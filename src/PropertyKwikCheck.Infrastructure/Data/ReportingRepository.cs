@@ -126,6 +126,36 @@ public sealed class ReportingRepository(IDbConnectionFactory factory) : IReporti
         }).ToList();
     }
 
+    public async Task<List<object?[]>> WeeklyLeadCountsAsync()
+    {
+        using var conn = await factory.OpenAsync();
+        var rows = (await conn.QueryAsync<(string Day, int N)>("""
+            SELECT DATENAME(weekday, created_at) AS Day, COUNT(*) AS N
+            FROM leads
+            WHERE deleted_at IS NULL AND created_at >= DATEADD(day, -7, SYSUTCDATETIME())
+            GROUP BY DATENAME(weekday, created_at)
+            """)).ToDictionary(r => r.Day, r => r.N, StringComparer.OrdinalIgnoreCase);
+
+        string[] order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        return order.Select(d => new object?[] { d[..3], rows.GetValueOrDefault(d, 0) }).ToList();
+    }
+
+    public async Task<List<object?[]>> MisSnapshotAsync()
+    {
+        using var conn = await factory.OpenAsync();
+        var counts = (await conn.QueryAsync<(string Stage, int N)>(
+            "SELECT stage AS Stage, COUNT(*) AS N FROM leads WHERE deleted_at IS NULL GROUP BY stage"))
+            .ToDictionary(r => r.Stage, r => r.N);
+        int C(string s) => counts.GetValueOrDefault(s, 0);
+        return
+        [
+            new object?[] { "Fresh leads", C("fresh").ToString() },
+            new object?[] { "In QC", C("qc").ToString() },
+            new object?[] { "Pricing", C("pricing").ToString() },
+            new object?[] { "Completed", C("completed").ToString() },
+        ];
+    }
+
     private static string ToneForInvoice(string status) => status switch
     {
         "Paid" => "good",

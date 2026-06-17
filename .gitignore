@@ -19,6 +19,13 @@ node_modules/
 web/dist/
 web/build/
 
+# Uploaded files (local disk storage)
+storage/
+**/bin/**/storage/
+
+# Logs
+*.log
+
 # OS
 Thumbs.db
 .DS_Store

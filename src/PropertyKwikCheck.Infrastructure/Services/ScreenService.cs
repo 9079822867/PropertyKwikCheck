@@ -16,7 +16,7 @@ public sealed class ScreenService(IReportingRepository reporting) : IScreenServi
     {
         "billing" => await BillingAsync(),
         "yard" => await YardAsync(),
-        "mis" => Mis(),
+        "mis" => await MisAsync(),
         "reports" => await ReportsAsync(),
         "documents" => Documents(),
         "master" => await MasterAsync(),
@@ -53,7 +53,7 @@ public sealed class ScreenService(IReportingRepository reporting) : IScreenServi
         };
     }
 
-    private static object Mis() => new Dictionary<string, object?>
+    private async Task<object> MisAsync() => new Dictionary<string, object?>
     {
         ["reports"] = new List<object?[]>
         {
@@ -61,14 +61,8 @@ public sealed class ScreenService(IReportingRepository reporting) : IScreenServi
             R("Valuer Productivity", "Cases closed per valuer", "48", "top performer", "user", "blue"),
             R("Rejection Analysis", "Reasons & rates", "2.1%", "rejection rate", "reject", "poor"),
         },
-        ["weekly"] = new List<object?[]>
-        {
-            R("Mon", 42), R("Tue", 38), R("Wed", 51), R("Thu", 47), R("Fri", 55), R("Sat", 29), R("Sun", 12),
-        },
-        ["snapshot"] = new List<object?[]>
-        {
-            R("Fresh leads", "6"), R("In QC", "3"), R("Pricing", "10"), R("Completed", "362"),
-        },
+        ["weekly"] = await reporting.WeeklyLeadCountsAsync(),
+        ["snapshot"] = await reporting.MisSnapshotAsync(),
     };
 
     private async Task<object> ReportsAsync()

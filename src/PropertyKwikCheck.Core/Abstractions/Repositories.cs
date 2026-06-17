@@ -12,6 +12,9 @@ public interface ILeadRepository
     Task SoftDeleteAsync(long id);
     Task AddStageHistoryAsync(LeadStageHistory history);
     Task<List<Lead>> RecentAsync(int count, LeadScope scope);
+
+    /// <summary>Recomputes tat_pct/tat_state for all active (non-terminal) leads at <paramref name="now"/>. Returns rows updated (spec §12).</summary>
+    Task<int> RecomputeTatAsync(DateTime now);
 }
 
 public interface IUserRepository
@@ -63,4 +66,10 @@ public interface IReportingRepository
 
     Task<List<(string Category, int Count, List<string> Samples)>> MasterCategoriesAsync();
     Task<List<object?[]>> IssuedReportsAsync(int limit);
+
+    /// <summary>MIS weekly leads created, [dayLabel, count] Mon→Sun (spec §8.8).</summary>
+    Task<List<object?[]>> WeeklyLeadCountsAsync();
+
+    /// <summary>MIS snapshot tuples [label, value] from live stage counts (spec §8.8).</summary>
+    Task<List<object?[]>> MisSnapshotAsync();
 }

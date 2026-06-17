@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using PropertyKwikCheck.Core.Abstractions;
 using PropertyKwikCheck.Core.Dtos;
 
@@ -8,6 +9,7 @@ namespace PropertyKwikCheck.Api.Controllers;
 public sealed class AuthController(IAuthService auth) : ApiControllerBase
 {
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     [HttpPost("auth/login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
@@ -17,6 +19,7 @@ public sealed class AuthController(IAuthService auth) : ApiControllerBase
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     [HttpPost("auth/refresh")]
     public async Task<ActionResult<TokenPair>> Refresh([FromBody] RefreshRequest request)
         => Ok(await auth.RefreshAsync(request.RefreshToken));

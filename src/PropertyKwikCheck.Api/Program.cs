@@ -1,14 +1,18 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
+using PropertyKwikCheck.Api.Background;
 using Microsoft.IdentityModel.Tokens;
 using PropertyKwikCheck.Api.Middleware;
 using PropertyKwikCheck.Core.Abstractions;
 using PropertyKwikCheck.Infrastructure.Data;
 using PropertyKwikCheck.Infrastructure.Security;
 using PropertyKwikCheck.Infrastructure.Services;
+using PropertyKwikCheck.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,18 +36,40 @@ builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
 
+var storageOptions = new StorageOptions();
+builder.Configuration.GetSection(StorageOptions.SectionName).Bind(storageOptions);
+builder.Services.AddSingleton(storageOptions);
+builder.Services.AddSingleton<IFileStorage>(_ => new LocalFileStorage(storageOptions));
+
 builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IReportingRepository, ReportingRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
 
 builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDirectoryService, DirectoryService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IScreenService, ScreenService>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IReportPdfService, PropertyKwikCheck.Infrastructure.Pdf.ReportPdfService>();
+
+// Background TAT recompute (spec §12).
+builder.Services.AddHostedService<TatRecalculationService>();
+
+// Rate limiting — protect the auth endpoints from brute force (spec §14).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+});
 
 // ---- auth -------------------------------------------------------------------
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false; // keep raw claim names (sub, roleId, ...)
@@ -98,8 +124,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("frontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Friendly landing: send the root to Swagger (Dev) / health, instead of a bare 401.
+app.MapGet("/", () => Results.Redirect(app.Environment.IsDevelopment() ? "/swagger" : "/api/health"))
+   .AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();

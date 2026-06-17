@@ -121,6 +121,30 @@ public sealed class LeadRepository(IDbConnectionFactory factory) : ILeadReposito
         await conn.ExecuteAsync("UPDATE leads SET deleted_at=SYSUTCDATETIME() WHERE id=@id", new { id });
     }
 
+    public async Task<int> RecomputeTatAsync(DateTime now)
+    {
+        using var conn = await factory.OpenAsync();
+        // Single set-based update: pct = elapsed/window * 100, clamped; state per spec §12 thresholds.
+        const string sql = """
+            ;WITH c AS (
+              SELECT id,
+                CASE WHEN DATEDIFF(second, assigned_on, tat_due) <= 0 THEN 0
+                     ELSE ROUND(DATEDIFF(second, assigned_on, @now) * 100.0
+                                / DATEDIFF(second, assigned_on, tat_due), 0) END AS pct
+              FROM leads
+              WHERE deleted_at IS NULL
+                AND stage NOT IN ('completed','rejected','duplicate')
+                AND assigned_on IS NOT NULL AND tat_due IS NOT NULL
+            )
+            UPDATE l SET
+              tat_pct   = CASE WHEN c.pct < 0 THEN 0 WHEN c.pct > 999 THEN 999 ELSE c.pct END,
+              tat_state = CASE WHEN c.pct <= 92 THEN 'ok' WHEN c.pct <= 100 THEN 'warn' ELSE 'over' END,
+              updated_at = SYSUTCDATETIME()
+            FROM leads l JOIN c ON c.id = l.id;
+            """;
+        return await conn.ExecuteAsync(sql, new { now });
+    }
+
     public async Task AddStageHistoryAsync(LeadStageHistory h)
     {
         using var conn = await factory.OpenAsync();
