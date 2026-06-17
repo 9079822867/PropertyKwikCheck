@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PropertyKwikCheck.Api/PropertyKwikCheck.Api.csproj" />
+    <Project Path="src/PropertyKwikCheck.Core/PropertyKwikCheck.Core.csproj" />
+    <Project Path="src/PropertyKwikCheck.Infrastructure/PropertyKwikCheck.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PropertyKwikCheck.Tests/PropertyKwikCheck.Tests.csproj" />
+  </Folder>
+</Solution>
