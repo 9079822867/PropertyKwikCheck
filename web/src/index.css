@@ -200,6 +200,23 @@ main { margin-left: var(--sidebar-w); margin-top: var(--topbar-h); padding: 26px
 .co-ic { width: 34px; height: 34px; border-radius: 9px; background: var(--blue-tint); color: var(--blue); display: grid; place-items: center; flex: 0 0 auto; }
 .co-ic svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.8; fill: none; }
 
+/* modals (prototype parity) */
+.overlay { position: fixed; inset: 0; background: rgba(12,39,66,.45); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.modal { background: #fff; border-radius: 16px; width: 100%; max-width: 520px; box-shadow: 0 30px 70px rgba(12,39,66,.3); overflow: hidden; }
+.modal-head { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.mh-ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: 0 0 auto; }
+.mh-ic svg { width: 20px; height: 20px; stroke-width: 1.9; fill: none; }
+.modal-head h3 { margin: 0; font-size: 16px; color: var(--navy); }
+.modal-head p { margin: 2px 0 0; font-size: 12px; color: var(--slate-500); }
+.modal-head .x { margin-left: auto; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--slate-500); cursor: pointer; display: grid; place-items: center; }
+.modal-head .x svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
+.modal-body { padding: 20px; }
+.modal-body .field { margin-bottom: 12px; }
+.modal-body textarea, .modal-body select, .modal-body input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; background: var(--slate-50); font-size: 13.5px; }
+.modal-body textarea { min-height: 88px; resize: vertical; }
+.modal-body select, .modal-body input { height: 40px; padding: 0 11px; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--line); }
+
 /* misc */
 .muted { color: var(--slate-500); }
 .center-screen { min-height: 100vh; display: grid; place-items: center; padding: 24px; }

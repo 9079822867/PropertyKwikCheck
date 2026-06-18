@@ -121,6 +121,15 @@ export function useScreen(name) {
 }
 
 // ---- master data CRUD -------------------------------------------------------
+export function useMasterItems(category, enabled = true) {
+  return useQuery({
+    queryKey: ["master", category],
+    queryFn: async () => (await api.get(`/master/${category}`)).data, // [{ id, value }]
+    enabled,
+    staleTime: 5 * 60_000,
+  });
+}
+
 export function useAddMasterItem() {
   const qc = useQueryClient();
   return useMutation({

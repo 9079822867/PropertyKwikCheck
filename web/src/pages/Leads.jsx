@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useLeads, useLeadAction } from "../lib/queries.js";
+import { useLeads } from "../lib/queries.js";
 import { Spinner, ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
+import LeadActionModals from "../components/LeadActionModals.jsx";
 import api from "../lib/api.js";
 import { BUCKET_MAP } from "../lib/constants.js";
 
@@ -96,7 +97,7 @@ export default function Leads() {
   useEffect(() => setSearch(q), [q]);
 
   const { data, isLoading, error, isFetching } = useLeads(bucket, q);
-  const action = useLeadAction();
+  const [modal, setModal] = useState(null); // { type, lead }
   const meta = BUCKET_MAP[bucket];
   const cols = colsFor(bucket);
 
@@ -107,13 +108,6 @@ export default function Leads() {
     setParams(next);
   }
 
-  function reassign(l) {
-    const v = window.prompt("Reassign to valuator (name):", l.valuator || "");
-    if (v) action.mutate({ id: l.id, body: { action: "reassign", valuator: v } });
-  }
-  function reject(l) {
-    if (window.confirm(`Reject lead ${l.reqId}?`)) action.mutate({ id: l.id, body: { action: "reject" } });
-  }
   async function download(l) {
     try {
       const res = await api.get(`/leads/${l.id}/report.pdf`, { responseType: "blob" });
@@ -157,11 +151,13 @@ export default function Leads() {
                         {cols.map((k) => COLDEF[k][1](l))}
                         <td>
                           <div className="row-actions">
-                            <button className="act" title="View" onClick={() => navigate(`/leads/${l.id}`)}><Icon name="view" /></button>
-                            <button className="act" title="Edit" onClick={() => navigate(`/leads/${l.id}/edit`)}><Icon name="reassign" /></button>
-                            {!terminal && <button className="act" title="Reassign" onClick={() => reassign(l)}><Icon name="reassign" /></button>}
-                            {!terminal && <button className="act reject" title="Reject" onClick={() => reject(l)}><Icon name="reject" /></button>}
-                            <button className="act" title={done ? "Download" : "Available when completed"} disabled={!done} onClick={() => download(l)}><Icon name="doc" /></button>
+                            <button className="act" title="Add note" onClick={() => setModal({ type: "note", lead: l })}><Icon name="note" /></button>
+                            {!terminal && <button className="act" title="Reassign" onClick={() => setModal({ type: "reassign", lead: l })}><Icon name="reassign" /></button>}
+                            <button className="act" title="Edit lead" onClick={() => navigate(`/leads/${l.id}/edit`)}><Icon name="note" /></button>
+                            {!terminal && <button className="act reject" title="Reject" onClick={() => setModal({ type: "reject", lead: l })}><Icon name="reject" /></button>}
+                            <button className="act" title="View report" onClick={() => navigate(`/leads/${l.id}`)}><Icon name="view" /></button>
+                            <button className="act" title={done ? "Download report" : "Available when completed"} disabled={!done} onClick={() => download(l)}><Icon name="download" /></button>
+                            <button className="act reject" title="Delete" onClick={() => setModal({ type: "delete", lead: l })}><Icon name="del" /></button>
                           </div>
                         </td>
                       </tr>
@@ -177,6 +173,8 @@ export default function Leads() {
           </>
         )}
       </div>
+
+      {modal && <LeadActionModals modal={modal} onClose={() => setModal(null)} />}
     </>
   );
 }
