@@ -14,6 +14,10 @@ const PATHS = {
   doc: "M7 3h7l5 5v13H7zM14 3v5h5",
   layers: "m12 3 9 5-9 5-9-5 9-5Zm9 11-9 5-9-5",
   clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-14v5l3 2",
+  home: "M3 11l9-8 9 8M5 9v11h14V9",
+  trend: "M3 17l6-6 4 4 8-8M21 7v5h-5",
+  buckets: "M3 7h18M3 12h18M3 17h18",
+  master: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16",
 };
 
 export default function Icon({ name, className, size = 18 }) {

@@ -12,7 +12,7 @@ public sealed class PhotosController(IFileService files) : ApiControllerBase
     [RequestSizeLimit(100 * 1024 * 1024)] // allow video frames up to 100 MB
     public async Task<IActionResult> Upload(
         long leadId,
-        [FromForm] IFormFile file,
+        IFormFile file,
         [FromForm] string frameLabel,
         [FromForm] string? kind,
         [FromForm] decimal? lat,

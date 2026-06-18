@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useLead } from "../lib/queries.js";
+import { useLead, useUpdateLead } from "../lib/queries.js";
+import api from "../lib/api.js";
 import { Spinner, ErrorBox, Pill } from "../components/ui.jsx";
 import { BUCKET_MAP, TAT_TONE, ASSET_LABEL } from "../lib/constants.js";
 import { inr } from "../lib/format.js";
@@ -17,6 +18,29 @@ export default function LeadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: lead, isLoading, error } = useLead(id);
+  const update = useUpdateLead(id);
+
+  function reassign() {
+    const valuator = window.prompt("Assign / reassign to valuator (name):", lead?.valuator || "");
+    if (valuator) update.mutate({ action: "reassign", valuator },
+      { onError: (e) => alert(e?.error || "Failed to reassign.") });
+  }
+
+  function reject() {
+    if (window.confirm("Reject this lead? This is terminal."))
+      update.mutate({ action: "reject" }, { onError: (e) => alert(e?.error || "Failed to reject.") });
+  }
+
+  async function downloadPdf() {
+    try {
+      const res = await api.get(`/leads/${id}/report.pdf`, { responseType: "blob" });
+      const url = URL.createObjectURL(res.data);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (e) {
+      alert(e?.error || "Report not available before QC stage.");
+    }
+  }
 
   if (isLoading) return <Spinner label="Loading lead…" />;
   if (error) return <ErrorBox error={error} />;
@@ -39,9 +63,17 @@ export default function LeadDetail() {
             <span className="mono">{lead.reqId}</span> · {ASSET_LABEL[lead.type] || lead.type} · {lead.ptype}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <Pill tone={meta?.tone || "info"}>{meta?.status || lead.stage}</Pill>
-          <Pill tone={TAT_TONE[lead.tatState] || "info"}>TAT {lead.tatPct}%</Pill>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-end" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <Pill tone={meta?.tone || "info"}>{meta?.status || lead.stage}</Pill>
+            <Pill tone={TAT_TONE[lead.tatState] || "info"}>TAT {lead.tatPct}%</Pill>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate(`/leads/${id}/edit`)}>Edit Report</button>
+            <button className="btn btn-ghost btn-sm" onClick={reassign} disabled={update.isPending}>Assign / Reassign</button>
+            <button className="btn btn-ghost btn-sm" onClick={downloadPdf}>Download PDF</button>
+            <button className="btn btn-danger btn-sm" onClick={reject} disabled={update.isPending}>Reject</button>
+          </div>
         </div>
       </div>
 

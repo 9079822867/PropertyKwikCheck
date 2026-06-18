@@ -9,7 +9,7 @@ public sealed class DocumentsController(IFileService files) : ApiControllerBase
 {
     [HttpPost("leads/{leadId:long}/documents")]
     [RequestSizeLimit(10 * 1024 * 1024)]
-    public async Task<IActionResult> Upload(long leadId, [FromForm] IFormFile file, [FromForm] string docType)
+    public async Task<IActionResult> Upload(long leadId, IFormFile file, [FromForm] string docType)
     {
         if (file is null) return BadRequest(new { error = "file is required", code = "VALIDATION" });
         await using var stream = file.OpenReadStream();

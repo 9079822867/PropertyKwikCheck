@@ -17,9 +17,12 @@ export const tokenStore = {
   },
 };
 
-// The exact client the contract is built around (BACKEND_SPEC §5).
+// API base: an absolute URL in production (the live domain), else same-origin "/api"
+// which the Vite dev server proxies to the backend (BACKEND_SPEC §5).
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: API_BASE,
   headers: { "Content-Type": "application/json" },
   timeout: 15000,
 });
@@ -43,7 +46,7 @@ async function refreshTokens() {
   const refreshToken = tokenStore.refresh;
   if (!refreshToken) throw new Error("No refresh token");
   // Use a bare axios call so the interceptors below don't recurse.
-  const { data } = await axios.post("/api/auth/refresh", { refreshToken });
+  const { data } = await axios.post(`${API_BASE}/auth/refresh`, { refreshToken });
   tokenStore.set(data);
   return data.token;
 }

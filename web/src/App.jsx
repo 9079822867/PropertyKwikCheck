@@ -4,7 +4,14 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Leads from "./pages/Leads.jsx";
+import NewLead from "./pages/NewLead.jsx";
 import LeadDetail from "./pages/LeadDetail.jsx";
+import LeadWizard from "./pages/LeadWizard.jsx";
+import Users from "./pages/Users.jsx";
+import Companies from "./pages/Companies.jsx";
+import ScreenPage from "./pages/ScreenPage.jsx";
+import Analytics from "./pages/Analytics.jsx";
+import Settings from "./pages/Settings.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
@@ -20,7 +27,14 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="leads" element={<Leads />} />
+        <Route path="leads/new" element={<NewLead />} />
         <Route path="leads/:id" element={<LeadDetail />} />
+        <Route path="leads/:id/edit" element={<LeadWizard />} />
+        <Route path="users" element={<Users />} />
+        <Route path="companies" element={<Companies />} />
+        <Route path="screens/:name" element={<ScreenPage />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

@@ -117,22 +117,24 @@ var app = builder.Build();
 // ---- pipeline ---------------------------------------------------------------
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger enabled in all environments (registered before auth so the UI is reachable).
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Serve the React SPA from wwwroot (single-domain hosting): static assets + index.html.
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.UseCors("frontend");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Friendly landing: send the root to Swagger (Dev) / health, instead of a bare 401.
-app.MapGet("/", () => Results.Redirect(app.Environment.IsDevelopment() ? "/swagger" : "/api/health"))
-   .AllowAnonymous();
-
 app.MapControllers();
+
+// SPA client-side routing: any non-API, non-file path serves index.html. Anonymous so
+// deep links (e.g. /leads) aren't caught by the fallback auth policy.
+app.MapFallbackToFile("index.html").AllowAnonymous();
 
 app.Run();
 

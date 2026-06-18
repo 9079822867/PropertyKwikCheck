@@ -35,6 +35,54 @@ export function useUpdateLead(id) {
   });
 }
 
+export function useCreateLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body) => (await api.post("/leads", body)).data, // { ptype, data }
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["meta"] });
+    },
+  });
+}
+
+// ---- directory: users -------------------------------------------------------
+export function useUsers() {
+  return useQuery({ queryKey: ["users"], queryFn: async () => (await api.get("/users")).data });
+}
+export function useRoles() {
+  return useQuery({ queryKey: ["roles"], queryFn: async () => (await api.get("/roles")).data, staleTime: Infinity });
+}
+export function useUserTypes() {
+  return useQuery({ queryKey: ["usertypes"], queryFn: async () => (await api.get("/usertypes")).data, staleTime: Infinity });
+}
+export function useCreateUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body) => (await api.post("/users", body)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+  });
+}
+export function useDeleteUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => (await api.delete(`/users/${id}`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+  });
+}
+
+// ---- directory: companies ---------------------------------------------------
+export function useCompanies() {
+  return useQuery({ queryKey: ["companies"], queryFn: async () => (await api.get("/companies")).data });
+}
+export function useCreateCompany() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body) => (await api.post("/companies", body)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["companies"] }),
+  });
+}
+
 // ---- dashboard / meta -------------------------------------------------------
 export function useMeta() {
   return useQuery({
@@ -56,5 +104,40 @@ export function useScreen(name) {
   return useQuery({
     queryKey: ["screen", name],
     queryFn: async () => (await api.get(`/screens/${name}`)).data,
+  });
+}
+
+// ---- photos (wizard stage 5) ------------------------------------------------
+export function usePhotos(leadId) {
+  return useQuery({
+    queryKey: ["photos", leadId],
+    queryFn: async () => (await api.get(`/leads/${leadId}/photos`)).data,
+    enabled: leadId != null,
+  });
+}
+
+export function useUploadPhoto(leadId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ file, frameLabel, kind }) => {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("frameLabel", frameLabel);
+      form.append("kind", kind || "photo");
+      // Let axios set the multipart boundary (override the default JSON content-type).
+      const { data } = await api.post(`/leads/${leadId}/photos`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["photos", leadId] }),
+  });
+}
+
+export function useDeletePhoto(leadId) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (photoId) => (await api.delete(`/photos/${photoId}`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["photos", leadId] }),
   });
 }

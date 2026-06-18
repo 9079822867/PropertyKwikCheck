@@ -2,10 +2,12 @@
 bin/
 obj/
 out/
+publish/
 *.user
 
 # Secrets — never commit real credentials (DB connection string, JWT key)
 appsettings.Development.json
+appsettings.Production.json
 appsettings.*.Local.json
 *.secrets.json
 
@@ -18,6 +20,9 @@ appsettings.*.Local.json
 node_modules/
 web/dist/
 web/build/
+
+# SPA build copied into the API for single-domain hosting (generated at deploy)
+src/PropertyKwikCheck.Api/wwwroot/
 
 # Uploaded files (local disk storage)
 storage/
