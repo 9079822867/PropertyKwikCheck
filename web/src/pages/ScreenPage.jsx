@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useScreen } from "../lib/queries.js";
+import { useScreen, useAddMasterItem } from "../lib/queries.js";
 import { Spinner, ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 
@@ -60,6 +60,36 @@ const Card = ({ icon, title, meta, children, pad = true }) => (
     {pad ? <div className="card-pad">{children}</div> : children}
   </div>
 );
+
+// Master data grid with live "Add item" (tuple: [label, count, icon, samples, rawKey]).
+function MasterGrid({ data }) {
+  const add = useAddMasterItem();
+  function addItem(label, key) {
+    const value = window.prompt(`Add a new value to “${label}”:`);
+    if (value && value.trim()) add.mutate({ category: key, value: value.trim() });
+  }
+  return (
+    <>
+      <div className="placeholder-note"><Icon name="master" />
+        <div>Edit a master list once and it updates everywhere — banks, asset types, valuation purposes, rejection reasons, localities and the DLC rate master all feed the forms.</div>
+      </div>
+      <div className="grid grid-3">
+        {data.map((s, i) => (
+          <Card key={i} icon={s[2] || "layers"} title={s[0]} meta={s[1]}>
+            {(s[3] || []).map((it, j) => (
+              <div key={j} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--slate-100)", fontSize: 12.5 }}>
+                <span style={{ color: "var(--slate-700)" }}>{it}</span>
+              </div>
+            ))}
+            <button className="btn btn-soft btn-sm" style={{ marginTop: 12, width: "100%" }} disabled={add.isPending} onClick={() => addItem(s[0], s[4])}>
+              <Icon name="plus" size={14} />Add item
+            </button>
+          </Card>
+        ))}
+      </div>
+    </>
+  );
+}
 
 export default function ScreenPage() {
   const { name } = useParams();
@@ -223,25 +253,7 @@ function render(name, d, navigate) {
       );
 
     case "master":
-      return (
-        <>
-          <div className="placeholder-note"><Icon name="master" />
-            <div>Edit a master list once and it updates everywhere — banks, asset types, valuation purposes, rejection reasons, localities and the DLC rate master all feed the forms.</div>
-          </div>
-          <div className="grid grid-3">
-            {d.map((s, i) => (
-              <Card key={i} icon={s[2] || "layers"} title={s[0]} meta={s[1]}>
-                {(s[3] || []).map((it, j) => (
-                  <div key={j} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--slate-100)", fontSize: 12.5 }}>
-                    <span style={{ color: "var(--slate-700)" }}>{it}</span>
-                  </div>
-                ))}
-                <button className="btn btn-soft btn-sm" style={{ marginTop: 12, width: "100%" }}><Icon name="plus" size={14} />Add item</button>
-              </Card>
-            ))}
-          </div>
-        </>
-      );
+      return <MasterGrid data={d} />;
 
     default:
       return <ErrorBox error={{ error: "Unknown screen" }} />;

@@ -120,6 +120,15 @@ export function useScreen(name) {
   });
 }
 
+// ---- master data CRUD -------------------------------------------------------
+export function useAddMasterItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ category, value }) => (await api.post("/master", { category, value })).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["screen", "master"] }),
+  });
+}
+
 // ---- photos (wizard stage 5) ------------------------------------------------
 export function usePhotos(leadId) {
   return useQuery({

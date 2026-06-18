@@ -49,6 +49,7 @@ builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IReportingRepository, ReportingRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
+builder.Services.AddScoped<IMasterRepository, MasterRepository>();
 
 builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<IAuthService, AuthService>();

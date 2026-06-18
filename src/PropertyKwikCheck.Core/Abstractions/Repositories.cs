@@ -64,7 +64,7 @@ public interface IReportingRepository
     /// <summary>Yard tuple: [time, valuer, reqId, assetType, location, statusLabel, tone] (spec §8.8).</summary>
     Task<List<object?[]>> YardScheduleAsync();
 
-    Task<List<(string Category, int Count, List<string> Samples)>> MasterCategoriesAsync();
+    Task<List<(string Label, string Key, int Count, List<string> Samples)>> MasterCategoriesAsync();
     Task<List<object?[]>> IssuedReportsAsync(int limit);
 
     /// <summary>MIS weekly leads created, [dayLabel, count] Mon→Sun (spec §8.8).</summary>
@@ -72,4 +72,15 @@ public interface IReportingRepository
 
     /// <summary>MIS snapshot tuples [label, value] from live stage counts (spec §8.8).</summary>
     Task<List<object?[]>> MisSnapshotAsync();
+
+    /// <summary>Recent uploaded documents across leads: [fileName, owner, sizeText, date].</summary>
+    Task<List<object?[]>> RecentDocumentsAsync(int limit);
+}
+
+/// <summary>CRUD over the master_lookups table (spec §8.8 master / §16.1).</summary>
+public interface IMasterRepository
+{
+    Task<List<(long Id, string Value)>> ItemsAsync(string category);
+    Task<long> AddAsync(string category, string value);
+    Task DeleteAsync(long id);
 }

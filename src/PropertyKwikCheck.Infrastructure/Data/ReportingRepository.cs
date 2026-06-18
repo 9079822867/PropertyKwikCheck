@@ -91,7 +91,7 @@ public sealed class ReportingRepository(IDbConnectionFactory factory) : IReporti
         }).ToList();
     }
 
-    public async Task<List<(string Category, int Count, List<string> Samples)>> MasterCategoriesAsync()
+    public async Task<List<(string Label, string Key, int Count, List<string> Samples)>> MasterCategoriesAsync()
     {
         using var conn = await factory.OpenAsync();
         var rows = await conn.QueryAsync<(string Category, string Value, int Sort)>("""
@@ -103,7 +103,8 @@ public sealed class ReportingRepository(IDbConnectionFactory factory) : IReporti
         return rows
             .GroupBy(r => r.Category)
             .Select(g => (
-                Category: CategoryLabels.GetValueOrDefault(g.Key, g.Key),
+                Label: CategoryLabels.GetValueOrDefault(g.Key, g.Key),
+                Key: g.Key,
                 Count: g.Count(),
                 Samples: g.Take(4).Select(x => x.Value).ToList()))
             .ToList();
@@ -154,6 +155,32 @@ public sealed class ReportingRepository(IDbConnectionFactory factory) : IReporti
             new object?[] { "Pricing", C("pricing").ToString() },
             new object?[] { "Completed", C("completed").ToString() },
         ];
+    }
+
+    public async Task<List<object?[]>> RecentDocumentsAsync(int limit)
+    {
+        using var conn = await factory.OpenAsync();
+        var rows = await conn.QueryAsync<(string FileName, string DocType, long? SizeBytes, string? Applicant, DateTime UploadedAt)>("""
+            SELECT TOP (@limit) d.file_name AS FileName, d.doc_type AS DocType, d.size_bytes AS SizeBytes,
+                   l.applicant AS Applicant, d.uploaded_at AS UploadedAt
+            FROM documents d
+            JOIN leads l ON l.id = d.lead_id
+            ORDER BY d.uploaded_at DESC
+            """, new { limit });
+        return rows.Select(r => new object?[]
+        {
+            $"{r.DocType} — {r.FileName}",
+            r.Applicant ?? "—",
+            FormatSize(r.SizeBytes),
+            r.UploadedAt.ToString("d MMM yyyy", Inv),
+        }).ToList();
+    }
+
+    private static string FormatSize(long? bytes)
+    {
+        if (bytes is null || bytes <= 0) return "—";
+        double mb = bytes.Value / (1024.0 * 1024.0);
+        return mb >= 1 ? $"PDF · {mb:0.0} MB" : $"PDF · {bytes.Value / 1024.0:0} KB";
     }
 
     private static string ToneForInvoice(string status) => status switch

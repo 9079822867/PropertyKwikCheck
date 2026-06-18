@@ -27,7 +27,7 @@ public class ContractShapeTests
         _reporting.Setup(r => r.YardScheduleAsync()).ReturnsAsync([]);
         _reporting.Setup(r => r.InvoicesAsync()).ReturnsAsync([]);
         _reporting.Setup(r => r.IssuedReportsAsync(It.IsAny<int>())).ReturnsAsync([]);
-        _reporting.Setup(r => r.MasterCategoriesAsync()).ReturnsAsync([("Banks & Lenders", 10, new List<string> { "HDFC Bank Ltd" })]);
+        _reporting.Setup(r => r.MasterCategoriesAsync()).ReturnsAsync([("Banks & Lenders", "banks", 10, new List<string> { "HDFC Bank Ltd" })]);
     }
 
     private static Dictionary<string, object?> AsDict(object o) => (Dictionary<string, object?>)o;
@@ -69,7 +69,7 @@ public class ContractShapeTests
         var payload = await svc.GetScreenAsync("master", TestData.SuperAdmin());
 
         var rows = (List<object?[]>)payload;
-        rows.Should().OnlyContain(row => row.Length == 4);
+        rows.Should().OnlyContain(row => row.Length == 5);
     }
 
     [Fact]

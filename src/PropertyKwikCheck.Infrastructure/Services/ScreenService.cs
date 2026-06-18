@@ -18,7 +18,7 @@ public sealed class ScreenService(IReportingRepository reporting) : IScreenServi
         "yard" => await YardAsync(),
         "mis" => await MisAsync(),
         "reports" => await ReportsAsync(),
-        "documents" => Documents(),
+        "documents" => await DocumentsAsync(),
         "master" => await MasterAsync(),
         _ => throw AppException.NotFound("Unknown screen"),
     };
@@ -80,21 +80,23 @@ public sealed class ScreenService(IReportingRepository reporting) : IScreenServi
         };
     }
 
-    private static object Documents() => new Dictionary<string, object?>
+    private async Task<object> DocumentsAsync() => new Dictionary<string, object?>
     {
         ["folders"] = new List<object?[]>
         {
             R("Sale Deeds & Titles", 842, "doc", "blue"),
-            R("Tax Receipts", 511, "doc", "good"),
-            R("Layout / Sanction Plans", 327, "doc", "amber"),
-            R("Khasra / Jamabandi", 268, "doc", "navy"),
+            R("Site Photographs", 1960, "map", "good"),
+            R("Valuation Reports", 3214, "doc", "navy"),
+            R("Encumbrance Certificates", 604, "shield", "amber"),
+            R("Bank NOCs / NDAs", 288, "doc", "poor"),
+            R("Revenue Records (RoR)", 511, "layers", "slate"),
         },
-        ["recent"] = new List<object?[]>(),
+        ["recent"] = await reporting.RecentDocumentsAsync(20),
     };
 
     private async Task<object> MasterAsync()
     {
         var cats = await reporting.MasterCategoriesAsync();
-        return cats.Select(c => R(c.Category, c.Count, "layers", c.Samples)).ToList();
+        return cats.Select(c => R(c.Label, c.Count, "layers", c.Samples, c.Key)).ToList();
     }
 }
