@@ -35,6 +35,19 @@ export function useUpdateLead(id) {
   });
 }
 
+// Generic per-row lead action ({ id, body }) for list views (reassign/reject/delete).
+export function useLeadAction() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, body, method }) =>
+      (method === "delete" ? await api.delete(`/leads/${id}`) : await api.patch(`/leads/${id}`, body)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["meta"] });
+    },
+  });
+}
+
 export function useCreateLead() {
   const qc = useQueryClient();
   return useMutation({
