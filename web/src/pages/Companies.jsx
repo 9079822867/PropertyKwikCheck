@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCompanies } from "../lib/queries.js";
 import { Spinner, ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
+import { toast } from "../lib/toast.js";
 
 export default function Companies() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ export default function Companies() {
         </div>
         {isLoading ? <Spinner /> : error ? <div style={{ padding: 16 }}><ErrorBox error={error} /></div> : (
           <table className="table">
-            <thead><tr><th>Company</th><th>Type</th><th>SPOC</th><th style={{ textAlign: "center" }}>Total Leads</th><th style={{ textAlign: "center" }}>Active</th><th>Status</th></tr></thead>
+            <thead><tr><th>Company</th><th>Type</th><th>SPOC</th><th style={{ textAlign: "center" }}>Total Leads</th><th style={{ textAlign: "center" }}>Active</th><th>Status</th><th style={{ textAlign: "right" }}>Actions</th></tr></thead>
             <tbody>
               {rows.map((c) => (
                 <tr key={c.id} style={{ cursor: "default" }}>
@@ -30,6 +31,10 @@ export default function Companies() {
                   <td style={{ fontSize: 12.5 }}>{c.type}</td><td style={{ fontSize: 12.5 }}>{c.spoc || "—"}</td>
                   <td style={{ textAlign: "center" }} className="mono">{c.leads}</td><td style={{ textAlign: "center" }} className="mono">{c.active}</td>
                   <td><span className={`pill ${c.status === "Active" ? "pill-good" : "pill-slate"}`}><span className="pdot" />{c.status}</span></td>
+                  <td><div className="row-actions">
+                    <button className="act" title="View" onClick={() => toast(`Open ${c.name}`)}><Icon name="view" /></button>
+                    <button className="act" title="Edit" onClick={() => toast(`Edit ${c.name}`)}><Icon name="note" /></button>
+                  </div></td>
                 </tr>
               ))}
             </tbody>

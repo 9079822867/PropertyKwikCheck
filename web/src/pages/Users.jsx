@@ -4,6 +4,7 @@ import { useUsers, useDeleteUser } from "../lib/queries.js";
 import { Spinner, ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 import { initials } from "../lib/format.js";
+import { toast } from "../lib/toast.js";
 
 export default function Users() {
   const navigate = useNavigate();
@@ -44,7 +45,11 @@ export default function Users() {
                     <td style={{ fontSize: 12.5 }}>{u.company || "—"}</td>
                     <td style={{ textAlign: "center" }} className="mono">{u.leads}</td>
                     <td><span className={`pill ${u.status === "Active" ? "pill-good" : "pill-slate"}`}><span className="pdot" />{u.status}</span></td>
-                    <td><div className="row-actions"><button className="act reject" title="Disable" onClick={() => { if (window.confirm(`Disable ${u.name}?`)) del.mutate(u.id); }}><Icon name="reject" /></button></div></td>
+                    <td><div className="row-actions">
+                      <button className="act" title="Edit" onClick={() => toast(`Edit user — ${u.name}`)}><Icon name="note" /></button>
+                      <button className="act" title="Permissions" onClick={() => toast("Manage permissions")}><Icon name="shield" /></button>
+                      <button className="act reject" title="Disable" onClick={() => { if (window.confirm(`Disable ${u.name}?`)) del.mutate(u.id); }}><Icon name="del" /></button>
+                    </div></td>
                   </tr>
                 );
               })}
