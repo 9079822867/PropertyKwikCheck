@@ -2,9 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoles, useUserTypes, useCompanies, useCreateUser } from "../lib/queries.js";
 import { ErrorBox } from "../components/ui.jsx";
+import Icon from "../components/Icon.jsx";
 
 const blank = { name: "", email: "", phone: "", roleId: "", userTypeId: "", companyId: "", licenceNo: "", password: "", status: "Active" };
 const inp = { width: "100%", height: 40, border: "1px solid var(--line)", borderRadius: 8, padding: "0 11px", background: "var(--slate-50)", fontSize: 13.5 };
+
+// Workflow stages shown in the permissions panel, mapped to the user types that own them.
+const STAGES = [
+  ["Intake & Records", "State Coordinator, Client", (t) => /Coordinator|Client|Admin|Super/.test(t)],
+  ["Technical & Risk", "RO Valuators, Cando Valuator", (t) => /Valuator|VALUATOR|Admin|Super/.test(t)],
+  ["QC Review", "Qc Manager", (t) => /Qc Manager|Admin|Super/.test(t)],
+  ["Pricing", "Pricing Manager", (t) => /Pricing|Admin|Super/.test(t)],
+  ["Valuation Sign-off", "National / Business Head", (t) => /National|Business|Super/.test(t)],
+  ["All stages", "Super Admin / Admin", (t) => /Super Admin|^Admin$/.test(t)],
+];
 
 export default function CreateUser() {
   const navigate = useNavigate();
@@ -15,6 +26,8 @@ export default function CreateUser() {
   const [form, setForm] = useState(blank);
   const [err, setErr] = useState(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const typeName = (types || []).find((t) => String(t.id) === String(form.userTypeId))?.name || "";
 
   async function submit() {
     setErr(null);
@@ -40,40 +53,65 @@ export default function CreateUser() {
   return (
     <>
       <div className="crumbs"><a onClick={() => navigate("/")}>Home</a><span className="sep">/</span><span>User Management</span><span className="sep">/</span><span style={{ color: "var(--navy)" }}>Create New User</span></div>
-      <div className="page-head"><div><h1>Create New User</h1><div className="sub">Add a team member and grant a workflow role.</div></div>
-        <button className="btn btn-ghost" onClick={() => navigate("/users")}>Back</button></div>
+      <div className="page-head">
+        <div><h1>Create New User</h1><div className="sub">Add a team member and grant a workflow role.</div></div>
+        <button className="btn btn-ghost" onClick={() => navigate("/users")}>Back</button>
+      </div>
 
       {err && <ErrorBox error={err} />}
 
-      <div className="card card-pad" style={{ maxWidth: 760 }}>
-        <div className="fs-title"><div className="n">1</div><h3>User Details</h3></div>
-        <div className="fs-sub">Identity, role and login.</div>
-        <div className="g2">
-          <Field label="Full Name" k="name" />
-          <Field label="Email" k="email" type="email" />
-          <Field label="Phone" k="phone" />
-          <Field label="Licence No." k="licenceNo" />
-          <div className="field" style={{ margin: 0 }}><label>Role</label>
-            <select style={inp} value={form.roleId} onChange={(e) => set("roleId", e.target.value)}>
-              <option value="">— role —</option>{(roles || []).map((r) => <option key={r.id} value={r.id}>{r.roleName}</option>)}
-            </select>
+      <div className="dash-2" style={{ gridTemplateColumns: "1.6fr 1fr", marginTop: 0 }}>
+        {/* step 1 — user details */}
+        <div className="card card-pad">
+          <div className="fs-title"><div className="n">1</div><h3>User Details</h3></div>
+          <div className="fs-sub">Identity, role and login.</div>
+          <div className="g2">
+            <Field label="Full Name" k="name" />
+            <Field label="Email" k="email" type="email" />
+            <Field label="Phone" k="phone" />
+            <Field label="Licence No." k="licenceNo" />
+            <div className="field" style={{ margin: 0 }}><label>Role</label>
+              <select style={inp} value={form.roleId} onChange={(e) => set("roleId", e.target.value)}>
+                <option value="">— role —</option>{(roles || []).map((r) => <option key={r.id} value={r.id}>{r.roleName}</option>)}
+              </select>
+            </div>
+            <div className="field" style={{ margin: 0 }}><label>Workflow User Type</label>
+              <select style={inp} value={form.userTypeId} onChange={(e) => set("userTypeId", e.target.value)}>
+                <option value="">— type —</option>{(types || []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="field" style={{ margin: 0 }}><label>Company</label>
+              <select style={inp} value={form.companyId} onChange={(e) => set("companyId", e.target.value)}>
+                <option value="">— none —</option>{(companies || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <Field label="Initial Password (optional)" k="password" type="password" />
+            <div className="field col2" style={{ margin: 0 }}>
+              <label>Status</label>
+              <div className="seg">
+                <button type="button" className={form.status === "Active" ? "on" : ""} onClick={() => set("status", "Active")}>Active</button>
+                <button type="button" className={form.status === "Inactive" ? "on" : ""} onClick={() => set("status", "Inactive")}>Inactive</button>
+              </div>
+            </div>
           </div>
-          <div className="field" style={{ margin: 0 }}><label>User Type</label>
-            <select style={inp} value={form.userTypeId} onChange={(e) => set("userTypeId", e.target.value)}>
-              <option value="">— type —</option>{(types || []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-          <div className="field" style={{ margin: 0 }}><label>Company</label>
-            <select style={inp} value={form.companyId} onChange={(e) => set("companyId", e.target.value)}>
-              <option value="">— none —</option>{(companies || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-          <Field label="Initial Password (optional)" k="password" type="password" />
         </div>
-        <div className="wizard-foot">
-          <button className="btn btn-ghost" onClick={() => navigate("/users")}>Cancel</button>
-          <button className="btn btn-primary" disabled={create.isPending} onClick={submit}>{create.isPending ? "Creating…" : "Create User"}</button>
+
+        {/* step 2 — stage permissions (role-derived) */}
+        <div className="card card-pad">
+          <div className="fs-title"><div className="n">2</div><h3>Stage Permissions</h3></div>
+          <div className="fs-sub">Auto-set by the selected user type.</div>
+          {STAGES.map(([stage, def, test]) => (
+            <label key={stage} className="perm-row">
+              <input type="checkbox" readOnly checked={typeName ? test(typeName) : stage === "Intake & Records"} />
+              <div><div className="pt">{stage}</div><div className="pd">Default: {def}</div></div>
+            </label>
+          ))}
         </div>
+      </div>
+
+      <div className="wizard-foot">
+        <button className="btn btn-ghost" onClick={() => navigate("/users")}>Cancel</button>
+        <button className="btn btn-primary" disabled={create.isPending} onClick={submit}><Icon name="check" size={16} />{create.isPending ? "Creating…" : "Create User"}</button>
       </div>
     </>
   );

@@ -27,6 +27,7 @@ const PATHS = {
   view: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
   pin: "M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11Zm0-8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z",
   building: "M4 21V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v16M12 21V9h7a1 1 0 0 1 1 1v11M7 8h2M7 12h2M16 13h1M16 17h1",
+  check: "M20 6 9 17l-5-5",
 };
 
 export default function Icon({ name, className, size = 18 }) {
