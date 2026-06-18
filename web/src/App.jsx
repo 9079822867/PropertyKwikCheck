@@ -8,7 +8,9 @@ import NewLead from "./pages/NewLead.jsx";
 import LeadDetail from "./pages/LeadDetail.jsx";
 import LeadWizard from "./pages/LeadWizard.jsx";
 import Users from "./pages/Users.jsx";
+import CreateUser from "./pages/CreateUser.jsx";
 import Companies from "./pages/Companies.jsx";
+import CreateCompany from "./pages/CreateCompany.jsx";
 import ScreenPage from "./pages/ScreenPage.jsx";
 import Analytics from "./pages/Analytics.jsx";
 import Settings from "./pages/Settings.jsx";
@@ -31,7 +33,9 @@ export default function App() {
         <Route path="leads/:id" element={<LeadDetail />} />
         <Route path="leads/:id/edit" element={<LeadWizard />} />
         <Route path="users" element={<Users />} />
+        <Route path="users/new" element={<CreateUser />} />
         <Route path="companies" element={<Companies />} />
+        <Route path="companies/new" element={<CreateCompany />} />
         <Route path="screens/:name" element={<ScreenPage />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />

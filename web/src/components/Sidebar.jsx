@@ -62,14 +62,16 @@ export default function Sidebar() {
       </div>
 
       <div className="nav-group-label">Administration</div>
-      <Parent k="users" icon="user" label="User Management" auto={pathname === "/users"} />
-      <div className={`subnav ${isOpen("users", pathname === "/users") ? "open" : ""}`}>
+      <Parent k="users" icon="user" label="User Management" auto={pathname.startsWith("/users")} />
+      <div className={`subnav ${isOpen("users", pathname.startsWith("/users")) ? "open" : ""}`}>
         <Sub to="/users" label="All Users" active={pathname === "/users"} />
+        <Sub to="/users/new" label="Create New User" active={pathname === "/users/new"} />
       </div>
       <Item icon="billing" label="Billing" active={pathname === "/screens/billing"} onClick={() => navigate("/screens/billing")} />
-      <Parent k="company" icon="company" label="Company" auto={pathname === "/companies"} />
-      <div className={`subnav ${isOpen("company", pathname === "/companies") ? "open" : ""}`}>
+      <Parent k="company" icon="company" label="Company" auto={pathname.startsWith("/companies")} />
+      <div className={`subnav ${isOpen("company", pathname.startsWith("/companies")) ? "open" : ""}`}>
         <Sub to="/companies" label="All Companies" active={pathname === "/companies"} />
+        <Sub to="/companies/new" label="Create Company" active={pathname === "/companies/new"} />
       </div>
       <Item icon="company" label="Yard" active={pathname === "/screens/yard"} onClick={() => navigate("/screens/yard")} />
       <Item icon="doc" label="Document Center" active={pathname === "/screens/documents"} onClick={() => navigate("/screens/documents")} />
