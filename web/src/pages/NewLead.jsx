@@ -1,19 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateLead } from "../lib/queries.js";
-import { stageFields } from "../lib/wizardSchema.js";
+import { ASSET_META, createIntakeSections } from "../lib/wizardSchema.js";
 import WizardField from "../components/WizardField.jsx";
 import Icon from "../components/Icon.jsx";
 import { ErrorBox } from "../components/ui.jsx";
 
 // Asset types → family + reqId prefix + report label (mirrors backend §16.2).
-const PTYPES = [
-  { ptype: "Residential", family: "property", prefix: "KC-RESI", rep: "Property Inspection", icon: "building" },
-  { ptype: "Commercial", family: "property", prefix: "KC-COMM", rep: "Property Inspection", icon: "building" },
-  { ptype: "Industrial", family: "property", prefix: "KC-IND", rep: "Property Inspection", icon: "building" },
-  { ptype: "Plot", family: "plot", prefix: "KC-PLOT", rep: "Plot Valuation", icon: "map" },
-  { ptype: "Agricultural Land", family: "agri", prefix: "KC-AGRI", rep: "Agri Land Valuation", icon: "map" },
-];
+const PTYPES = Object.entries(ASSET_META).map(([ptype, m]) => ({ ptype, ...m }));
 
 export default function NewLead() {
   const navigate = useNavigate();
@@ -22,12 +16,17 @@ export default function NewLead() {
   const [data, setData] = useState({});
   const [err, setErr] = useState(null);
 
-  const meta = PTYPES.find((p) => p.ptype === ptype);
+  const meta = ASSET_META[ptype];
+  // Report Type + Property / Asset Type are derived from the chosen asset type (read-only).
+  const sections = useMemo(() => createIntakeSections(ptype), [ptype]);
+  const view = { ...data, reportType: meta.report, propertyType: ptype };
   const onChange = (k, v) => setData((d) => ({ ...d, [k]: v }));
 
   async function submit(openEditor) {
     setErr(null);
-    const payload = { ...data, reportType: meta.rep, propertyType: ptype };
+    // leadId is a display-only preview; the backend assigns the real reqId.
+    const { leadId, ...rest } = data;
+    const payload = { ...rest, reportType: meta.report, propertyType: ptype };
     try {
       const lead = await create.mutateAsync({ ptype, data: payload });
       navigate(openEditor ? `/leads/${lead.id}/edit` : `/leads/${lead.id}`);
@@ -54,7 +53,7 @@ export default function NewLead() {
               <div key={p.ptype} onClick={() => setPtype(p.ptype)}
                 style={{ flex: "1 1 210px", border: `2px solid ${on ? "var(--blue)" : "var(--line)"}`, background: on ? "var(--blue-tint)" : "#fff", borderRadius: 13, padding: 15, cursor: "pointer", display: "flex", gap: 12, alignItems: "center" }}>
                 <div style={{ width: 42, height: 42, borderRadius: 11, background: on ? "#fff" : "var(--blue-tint)", display: "grid", placeItems: "center", color: "var(--blue)", flex: "0 0 auto" }}><Icon name={p.icon} /></div>
-                <div><div style={{ fontWeight: 700, color: "var(--navy)", fontSize: 13.5 }}>{p.ptype}</div><div style={{ fontSize: 11, color: "var(--slate-500)" }}>{p.prefix} · {p.rep}</div></div>
+                <div><div style={{ fontWeight: 700, color: "var(--navy)", fontSize: 13.5 }}>{p.ptype}</div><div style={{ fontSize: 11, color: "var(--slate-500)" }}>{p.prefix} · {p.report}</div></div>
                 <div style={{ marginLeft: "auto", width: 20, height: 20, borderRadius: "50%", border: `2px solid ${on ? "var(--blue)" : "var(--slate-300)"}`, display: "grid", placeItems: "center" }}>
                   {on && <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--blue)" }} />}
                 </div>
@@ -64,13 +63,19 @@ export default function NewLead() {
         </div>
       </div>
 
-      <div className="card card-pad">
-        <div className="fs-title"><div className="n">1</div><h3>Intake Details</h3></div>
-        <div className="fs-sub">Applicant, lender and case basics. Remaining stages are filled in the report editor.</div>
-        <div className="grid grid-3" style={{ gap: 16 }}>
-          {stageFields("intake", meta.family).map((f) => <WizardField key={f.k} field={f} data={data} onChange={onChange} />)}
+      {sections.map((sec, i) => (
+        <div className="card card-pad" key={sec.t} style={{ marginBottom: 18 }}>
+          <div className="fs-title"><div className="n">{i + 1}</div><h3>{sec.t}</h3></div>
+          <div className="fs-sub">{sec.s}</div>
+          <div className="grid" style={{ gridTemplateColumns: `repeat(${sec.c}, 1fr)`, gap: 16 }}>
+            {sec.f.map((f) => (
+              <div key={f.k} style={{ gridColumn: f.c ? `span ${Math.min(f.c, sec.c)}` : "auto" }}>
+                <WizardField field={f} data={view} onChange={onChange} />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ))}
 
       <div className="wizard-foot">
         <button className="btn btn-ghost" onClick={() => navigate("/")}>Discard</button>

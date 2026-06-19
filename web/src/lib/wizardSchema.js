@@ -161,6 +161,94 @@ export function stageFields(stage, family) {
   }
 }
 
+// ---- Create-New-Lead intake (grouped sections, asset-type-aware) -------------
+// Mirrors the prototype's schemaIntake(forCreate=true): three sections, dropdown
+// options that change with the selected asset type, and an asset-specific Lead-No prefix.
+const BANKS = [
+  "HDFC Bank Ltd", "ICICI Bank Ltd", "Axis Bank Ltd", "State Bank of India", "Kotak Mahindra Bank",
+  "Bajaj Finserv", "Saraswat Co-operative Bank Ltd", "Tata Capital Housing Finance", "Kogta Financial India Ltd",
+];
+
+export const ASSET_META = {
+  "Residential": { family: "property", prefix: "KC-RESI", report: "Property Inspection", icon: "building" },
+  "Commercial": { family: "property", prefix: "KC-COMM", report: "Property Inspection", icon: "building" },
+  "Industrial": { family: "property", prefix: "KC-IND", report: "Property Inspection", icon: "building" },
+  "Plot": { family: "plot", prefix: "KC-PLOT", report: "Plot Valuation", icon: "map" },
+  "Agricultural Land": { family: "agri", prefix: "KC-AGRI", report: "Agri Land Valuation", icon: "map" },
+};
+
+// Valuation Purpose / Loan Type vary per asset type; Document Type & the "relied upon"
+// hint vary per family (property / plot / agri).
+const PURPOSE = {
+  "Residential": ["Home Loan", "Loan Against Property", "Balance Transfer", "Renewal / Review", "Auction / SARFAESI", "Other"],
+  "Commercial": ["Business Loan — Collateral", "Loan Against Property", "Lease Rental Discounting", "Renewal / Review", "Auction / SARFAESI", "Other"],
+  "Industrial": ["Term Loan — Collateral", "Working Capital", "Loan Against Property", "Renewal / Review", "Auction / SARFAESI", "Other"],
+  "Plot": ["Plot Purchase Loan", "Home Construction Loan", "Loan Against Property", "Renewal / Review", "Auction / SARFAESI", "Other"],
+  "Agricultural Land": ["Agri Term Loan — Collateral", "Kisan Credit Card (KCC)", "Farm Development", "Renewal / Review", "Auction / SARFAESI", "Other"],
+};
+const LOAN_TYPE = {
+  "Residential": ["Home Loan", "Loan Against Property", "Mortgage", "Other"],
+  "Commercial": ["Business Loan", "Loan Against Property", "Lease Rental Discounting", "Mortgage", "Other"],
+  "Industrial": ["Term Loan", "Working Capital", "Loan Against Property", "Mortgage", "Other"],
+  "Plot": ["Plot Loan", "Home Loan", "Loan Against Property", "Mortgage", "Other"],
+  "Agricultural Land": ["Agricultural Loan", "Kisan Credit Card", "Farm Development Loan", "Loan Against Property", "Other"],
+};
+const DOC_TYPE = {
+  property: ["Sale Deed", "Title Deed", "Tax Receipt", "NOC", "Occupancy Certificate", "Layout / Sanction Plan", "Encumbrance Certificate", "Mutation", "Allotment Letter", "Other"],
+  plot: ["Sale Deed", "Title Deed", "Layout / Sanction Plan", "Tax Receipt", "Mutation", "Encumbrance Certificate", "Allotment Letter", "Other"],
+  agri: ["Jamabandi (RoR)", "Khasra / Girdawari", "Mutation", "Map / Tippan", "Sale Deed", "Encumbrance Certificate", "Other"],
+};
+const DOCS_HINT = {
+  property: "Sale Deed, NOC, Tax Receipt, OC…",
+  plot: "Sale Deed, Layout Plan, Mutation, Tax Receipt…",
+  agri: "Jamabandi, Khasra / Girdawari, Mutation, Map…",
+};
+
+// field with extras: ph (placeholder), c (colspan), ro (read-only / auto-set)
+const fx = (k, label, t = "text", extra = {}) => ({ k, label, t, options: extra.opt, ph: extra.ph, c: extra.c, ro: extra.ro });
+
+export function createIntakeSections(assetType) {
+  const m = ASSET_META[assetType] || ASSET_META.Residential;
+  const fam = m.family;
+  return [
+    {
+      t: "Case Registration", s: "Core identifiers for this valuation request", c: 3, f: [
+        fx("reportType", "Report Type", "text", { ro: true }),
+        fx("propertyType", "Property / Asset Type", "text", { ro: true }),
+        fx("loanNo", "Loan / Prospect No."),
+        fx("leadId", "Report / Lead No.", "text", { ro: true, ph: `${m.prefix}-2026-#####` }),
+        fx("reqId", "Request ID"),
+        fx("claimNo", "Bank Claim / Ref No."),
+        fx("leadDate", "Lead Date", "date"),
+        fx("source", "Source", "sel", { opt: SOURCES }),
+        fx("valuationPurpose", "Valuation Purpose", "sel", { opt: PURPOSE[assetType] || PURPOSE.Residential }),
+        fx("loanType", "Loan Type", "sel", { opt: LOAN_TYPE[assetType] || LOAN_TYPE.Residential }),
+      ],
+    },
+    {
+      t: "Applicant & Lender", s: "Borrower, lender / branch and bank executive", c: 3, f: [
+        fx("applicant", "Applicant Name"),
+        fx("coApplicant", "Co-Applicant Name"),
+        fx("contact", "Contact Number"),
+        fx("lender", "Lender / Bank (Requested By)", "sel", { opt: BANKS }),
+        fx("branch", "Branch"),
+        fx("execName", "Bank Executive Name"),
+        fx("execPhone", "Bank Executive Phone"),
+        fx("execEmail", "Bank Executive Email"),
+      ],
+    },
+    {
+      t: "Addresses & Documents", s: "Document address, papers relied upon & uploads", c: 2, f: [
+        fx("addrDoc", "Address (As Per Document)", "ta", { c: 2 }),
+        fx("docsRelied", "Documents Relied Upon", "text", { c: 2, ph: DOCS_HINT[fam] }),
+        fx("docType", "Document Type", "sel", { opt: DOC_TYPE[fam] }),
+        fx("docFile", "Upload Document", "file"),
+        fx("remarks", "Remarks", "ta", { c: 2 }),
+      ],
+    },
+  ];
+}
+
 export function technicalSchema(family) {
   return TECHNICAL[family] || { scores: [], groups: [] };
 }
