@@ -193,6 +193,8 @@
   aspect-ratio: 4 / 3; background: linear-gradient(135deg, #dfe6ef, #c7d2e0);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--navy); position: relative;
 }
+.kc-photos .p .frame.has-img { background: #0f2742; }
+.kc-photos .p .frame .ph-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .kc-photos .p .frame .ph-no { font-size: 26px; font-weight: 800; opacity: 0.35; }
 .kc-photos .p .frame .ph-tag { position: absolute; top: 8px; left: 8px; font-size: 8px; font-weight: 800; letter-spacing: 1px; background: var(--navy); color: #fff; padding: 3px 7px; border-radius: 5px; }
 .kc-photos .p .frame .ph-stamp { position: absolute; bottom: 8px; right: 8px; font-size: 9px; font-weight: 700; background: rgba(0, 0, 0, 0.55); color: #fff; padding: 2px 6px; border-radius: 4px; font-variant-numeric: tabular-nums; }

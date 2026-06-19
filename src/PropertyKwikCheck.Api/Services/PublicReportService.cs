@@ -17,7 +17,7 @@ public interface IPublicReportService
     Task<JsonObject> GetReportAsync(long leadId);
 }
 
-public sealed class PublicReportService(ILeadRepository leads) : IPublicReportService
+public sealed class PublicReportService(ILeadRepository leads, IPhotoRepository photos) : IPublicReportService
 {
     // The template ships as an embedded resource; parse-and-cache the raw text once.
     private static readonly string TemplateJson = LoadTemplate();
@@ -35,8 +35,62 @@ public sealed class PublicReportService(ILeadRepository leads) : IPublicReportSe
             JsonNode.Parse(lead.ReportData) is JsonObject stored)
             DeepMerge(report, stored);
 
+        // Surface actually-uploaded site photos (public image URLs) over the placeholders.
+        await MergePhotosAsync(report, leadId);
+
         return report;
     }
+
+    /// <summary>
+    /// Attaches each uploaded photo's public image URL to the matching template slot (by
+    /// frame-label slug), and appends any unmatched uploads as a "Site Photographs" group so
+    /// nothing the inspector captured is hidden.
+    /// </summary>
+    private async Task MergePhotosAsync(JsonObject report, long leadId)
+    {
+        var uploaded = await photos.ListByLeadAsync(leadId);
+        if (uploaded.Count == 0) return;
+
+        var bySlug = new Dictionary<string, Photo>(StringComparer.OrdinalIgnoreCase);
+        foreach (var p in uploaded)
+            bySlug[Slug(p.FrameLabel ?? "photo")] = p;
+
+        var photosNode = Child(report, "photos");
+        var groups = photosNode["groups"] as JsonArray ?? (JsonArray)(photosNode["groups"] = new JsonArray());
+        var matched = new HashSet<long>();
+
+        foreach (var group in groups.OfType<JsonObject>())
+            if (group["items"] is JsonArray items)
+                foreach (var item in items.OfType<JsonObject>())
+                {
+                    var slug = Slug(item["title"]?.GetValue<string>() ?? "");
+                    if (slug.Length > 0 && bySlug.TryGetValue(slug, out var p))
+                    {
+                        item["url"] = PhotoUrl(leadId, p.Id);
+                        item["stamp"] = (p.CapturedAt ?? p.UploadedAt).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                        matched.Add(p.Id);
+                    }
+                }
+
+        var extras = uploaded.Where(p => !matched.Contains(p.Id)).ToList();
+        if (extras.Count == 0) return;
+
+        var extraItems = new JsonArray();
+        var n = 0;
+        foreach (var p in extras)
+            extraItems.Add(new JsonObject
+            {
+                ["no"] = (++n).ToString("D2", CultureInfo.InvariantCulture),
+                ["title"] = p.FrameLabel ?? "Site Photograph",
+                ["note"] = p.Kind == "video" ? "Captured video frame" : "Captured on site",
+                ["tag"] = "ON-SITE",
+                ["stamp"] = (p.CapturedAt ?? p.UploadedAt).ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                ["url"] = PhotoUrl(leadId, p.Id),
+            });
+        groups.Add(new JsonObject { ["title"] = "Site Photographs", ["count"] = $"{extras.Count} uploaded", ["items"] = extraItems });
+    }
+
+    private static string PhotoUrl(long leadId, long photoId) => $"/api/public/reports/{leadId}/photos/{photoId}";
 
     /// <summary>Maps live lead columns onto the report, only when the column has a value.</summary>
     private static void Overlay(JsonObject report, Lead lead)
@@ -86,6 +140,11 @@ public sealed class PublicReportService(ILeadRepository leads) : IPublicReportSe
         => Child(root, section)[key] = value;
 
     private static string? FmtDate(DateTime? d) => d?.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+
+    /// <summary>Same slug rule as FileService so a photo's frame label maps to its template slot.</summary>
+    private static string Slug(string s) =>
+        new string(s.ToLowerInvariant().Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray())
+            .Trim('-').Replace("--", "-");
 
     /// <summary>Indian-grouping integer format, e.g. 21540000 → "2,15,40,000".</summary>
     private static string FmtInr(long value)

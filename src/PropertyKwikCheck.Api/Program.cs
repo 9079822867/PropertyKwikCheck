@@ -38,6 +38,11 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqlConnectionFactor
 
 var storageOptions = new StorageOptions();
 builder.Configuration.GetSection(StorageOptions.SectionName).Bind(storageOptions);
+// Anchor a relative storage root to the content root (stable), NOT the bin/<config> output
+// dir — otherwise Debug/Release/publish each get a separate, empty uploads folder and
+// previously-uploaded files appear "missing".
+if (!Path.IsPathRooted(storageOptions.Root))
+    storageOptions.Root = Path.Combine(builder.Environment.ContentRootPath, storageOptions.Root);
 builder.Services.AddSingleton(storageOptions);
 builder.Services.AddSingleton<IFileStorage>(_ => new LocalFileStorage(storageOptions));
 

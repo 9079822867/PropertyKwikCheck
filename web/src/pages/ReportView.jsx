@@ -242,9 +242,10 @@ export default function ReportView() {
             <div className="kc-photos">
               {g.items.map((p, i) => (
                 <div className="p" key={i}>
-                  <div className="frame">
+                  <div className={`frame ${p.url ? "has-img" : ""}`}>
+                    {p.url && <img className="ph-img" src={p.url} alt={p.title} loading="lazy" />}
                     <span className="ph-tag">{p.tag}</span>
-                    <span className="ph-no">{p.no}</span>
+                    {!p.url && <span className="ph-no">{p.no}</span>}
                     <span className="ph-stamp">{p.stamp}</span>
                   </div>
                   <div className="meta"><div className="t">{p.no} · {p.title}</div><div className="n">{p.note}</div></div>
