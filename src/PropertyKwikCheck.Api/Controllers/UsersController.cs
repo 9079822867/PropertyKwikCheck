@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PropertyKwikCheck.Core.Abstractions;
 using PropertyKwikCheck.Core.Dtos;
+using PropertyKwikCheck.Core.Rbac;
 
 namespace PropertyKwikCheck.Api.Controllers;
 
@@ -35,4 +36,20 @@ public sealed class UsersController(IDirectoryService directory, IUserRepository
 
     [HttpGet("usertypes")]
     public async Task<IActionResult> UserTypes() => Ok(await users.UserTypesAsync());
+
+    /// <summary>RO valuators for lead assignment, optionally filtered to one RO company (spec: assign company → valuator).</summary>
+    [HttpGet("valuators")]
+    public async Task<IActionResult> Valuators([FromQuery] long? companyId = null)
+    {
+        CurrentUser.Require(Capability.AssignReassign);
+        var rows = await users.ValuatorsAsync(companyId);
+        return Ok(rows.Select(u => new
+        {
+            id = u.Id,
+            name = u.Name,
+            company = u.CompanyName,
+            companyId = u.CompanyId,
+            licenceNo = u.LicenceNo,
+        }));
+    }
 }

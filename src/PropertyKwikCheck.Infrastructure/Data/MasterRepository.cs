@@ -1,5 +1,6 @@
 using Dapper;
 using PropertyKwikCheck.Core.Abstractions;
+using PropertyKwikCheck.Core.Domain;
 
 namespace PropertyKwikCheck.Infrastructure.Data;
 
@@ -28,5 +29,12 @@ public sealed class MasterRepository(IDbConnectionFactory factory) : IMasterRepo
     {
         using var conn = await factory.OpenAsync();
         await conn.ExecuteAsync("UPDATE master_lookups SET active = 0 WHERE id = @id", new { id });
+    }
+
+    public async Task<List<StatusType>> StatusTypesAsync()
+    {
+        using var conn = await factory.OpenAsync();
+        return (await conn.QueryAsync<StatusType>(
+            "SELECT id, code, label, sort, active FROM statustype WHERE active = 1 ORDER BY sort, id")).ToList();
     }
 }

@@ -12,12 +12,13 @@ namespace PropertyKwikCheck.Tests;
 public class LeadServiceTests
 {
     private readonly Mock<ILeadRepository> _leads = new();
+    private readonly Mock<IUserRepository> _users = new();
     private readonly Mock<IAuditRepository> _audit = new();
     private readonly LeadService _service;
 
     public LeadServiceTests()
     {
-        _service = new LeadService(_leads.Object, _audit.Object, new FixedClock(new DateTime(2026, 6, 1)));
+        _service = new LeadService(_leads.Object, _users.Object, _audit.Object, new FixedClock(new DateTime(2026, 6, 1)));
     }
 
     private static JsonObject Json(string s) => JsonNode.Parse(s)!.AsObject();

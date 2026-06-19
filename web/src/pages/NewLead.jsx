@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateLead } from "../lib/queries.js";
 import { ASSET_META, createIntakeSections } from "../lib/wizardSchema.js";
@@ -17,16 +17,20 @@ export default function NewLead() {
   const [err, setErr] = useState(null);
 
   const meta = ASSET_META[ptype];
-  // Report Type + Property / Asset Type are derived from the chosen asset type (read-only).
   const sections = useMemo(() => createIntakeSections(ptype), [ptype]);
-  const view = { ...data, reportType: meta.report, propertyType: ptype };
+  // Report Type + Property / Asset Type default from the chosen asset type but remain editable
+  // (Residential/Commercial/Industrial → Property Inspection, Plot → Plot Valuation, Agri → Agri Land Valuation).
+  useEffect(() => {
+    setData((d) => ({ ...d, reportType: meta.report, propertyType: ptype }));
+  }, [ptype]); // eslint-disable-line react-hooks/exhaustive-deps
+  const view = data;
   const onChange = (k, v) => setData((d) => ({ ...d, [k]: v }));
 
   async function submit(openEditor) {
     setErr(null);
     // leadId is a display-only preview; the backend assigns the real reqId.
     const { leadId, ...rest } = data;
-    const payload = { ...rest, reportType: meta.report, propertyType: ptype };
+    const payload = { ...rest, reportType: data.reportType || meta.report, propertyType: data.propertyType || ptype };
     try {
       const lead = await create.mutateAsync({ ptype, data: payload });
       navigate(openEditor ? `/leads/${lead.id}/edit` : `/leads/${lead.id}`);

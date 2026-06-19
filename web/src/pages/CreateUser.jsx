@@ -48,6 +48,19 @@ export default function CreateUser() {
   }, [isEdit, id, users, roles, types, companies]);
 
   const typeName = (types || []).find((t) => String(t.id) === String(form.userTypeId))?.name || "";
+  // User types are scoped to a role (UserTypes.company_type_id → Roles.id): pick a role first,
+  // then only that role's user types are selectable.
+  const roleTypes = (types || []).filter((t) => !form.roleId || String(t.companyTypeId) === String(form.roleId));
+
+  // When the role changes, clear a user type that no longer belongs to it.
+  function setRole(roleId) {
+    setForm((f) => {
+      const stillValid = (types || []).some(
+        (t) => String(t.id) === String(f.userTypeId) && String(t.companyTypeId) === String(roleId)
+      );
+      return { ...f, roleId, userTypeId: stillValid ? f.userTypeId : "" };
+    });
+  }
 
   async function submit() {
     setErr(null);
@@ -102,13 +115,14 @@ export default function CreateUser() {
             <Field label="Phone" k="phone" />
             <Field label="Licence No." k="licenceNo" />
             <div className="field" style={{ margin: 0 }}><label>Role</label>
-              <select style={inp} value={form.roleId} onChange={(e) => set("roleId", e.target.value)}>
+              <select style={inp} value={form.roleId} onChange={(e) => setRole(e.target.value)}>
                 <option value="">— role —</option>{(roles || []).map((r) => <option key={r.id} value={r.id}>{r.roleName}</option>)}
               </select>
             </div>
             <div className="field" style={{ margin: 0 }}><label>Workflow User Type</label>
-              <select style={inp} value={form.userTypeId} onChange={(e) => set("userTypeId", e.target.value)}>
-                <option value="">— type —</option>{(types || []).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              <select style={inp} value={form.userTypeId} disabled={!form.roleId} onChange={(e) => set("userTypeId", e.target.value)}>
+                <option value="">{form.roleId ? "— type —" : "— select a role first —"}</option>
+                {roleTypes.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
             </div>
             <div className="field" style={{ margin: 0 }}><label>Company</label>

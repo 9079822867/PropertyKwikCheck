@@ -91,6 +91,29 @@ export function useDeleteUser() {
   });
 }
 
+// RO valuators for lead assignment (optionally scoped to one RO company).
+export function useValuators(companyId, enabled = true) {
+  return useQuery({
+    queryKey: ["valuators", companyId ?? "all"],
+    queryFn: async () => {
+      const params = {};
+      if (companyId != null && companyId !== "") params.companyId = companyId;
+      return (await api.get("/valuators", { params })).data; // [{ id, name, company, companyId, licenceNo }]
+    },
+    enabled,
+    staleTime: 60_000,
+  });
+}
+
+// Lead-stage lookup (dbo.statustype) — backs the lead table label + edit stage dropdown.
+export function useStatusTypes() {
+  return useQuery({
+    queryKey: ["statustypes"],
+    queryFn: async () => (await api.get("/statustypes")).data, // [{ id, code, label, sort }]
+    staleTime: Infinity,
+  });
+}
+
 // ---- directory: companies ---------------------------------------------------
 export function useCompanies() {
   return useQuery({ queryKey: ["companies"], queryFn: async () => (await api.get("/companies")).data });

@@ -12,6 +12,16 @@ public sealed class LeadStageHistory
     public DateTime CreatedAt { get; set; }
 }
 
+/// <summary>Lead-stage lookup row (dbo.statustype). <see cref="Code"/> matches a <c>leads.stage</c> value.</summary>
+public sealed class StatusType
+{
+    public int Id { get; set; }
+    public string Code { get; set; } = "";
+    public string Label { get; set; } = "";
+    public int Sort { get; set; }
+    public bool Active { get; set; } = true;
+}
+
 /// <summary>Append-only audit record (spec §13).</summary>
 public sealed class AuditEntry
 {

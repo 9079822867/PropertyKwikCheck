@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLeadAction, useMasterItems } from "../lib/queries.js";
+import { useMemo, useState } from "react";
+import { useLeadAction, useValuators } from "../lib/queries.js";
 import Icon from "./Icon.jsx";
 
 const REJECT_REASONS = ["Insufficient documents", "Property not traceable", "Duplicate request", "Out of service area", "Customer not reachable", "Bank withdrew request"];
@@ -25,11 +25,23 @@ function Shell({ icon, tone, title, sub, onClose, children, foot }) {
 
 export default function LeadActionModals({ modal, onClose }) {
   const action = useLeadAction();
-  const isReassign = modal?.type === "reassign";
-  const { data: valuers } = useMasterItems("valuers", isReassign);
+  const isAssign = modal?.type === "assign" || modal?.type === "reassign";
+  const { data: valuers } = useValuators(undefined, isAssign);
 
   const [noteText, setNoteText] = useState("");
-  const [valuer, setValuer] = useState(modal?.lead?.valuator || "");
+  // Two-step assignment: pick the RO company, then a valuator within it.
+  const [roCompanyId, setRoCompanyId] = useState("");
+  const [valuatorUserId, setValuatorUserId] = useState("");
+
+  // Distinct RO companies derived from the valuator list.
+  const companies = useMemo(() => {
+    const seen = new Map();
+    for (const v of valuers || []) {
+      if (v.companyId != null && !seen.has(v.companyId)) seen.set(v.companyId, v.company || "RO Company");
+    }
+    return [...seen.entries()].map(([id, name]) => ({ id, name }));
+  }, [valuers]);
+  const companyValuers = (valuers || []).filter((v) => String(v.companyId) === String(roCompanyId));
 
   if (!modal) return null;
   const l = modal.lead;
@@ -52,23 +64,35 @@ export default function LeadActionModals({ modal, onClose }) {
     );
   }
 
-  if (modal.type === "reassign") {
+  if (isAssign) {
+    const reassign = modal.type === "reassign";
+    const chosen = companyValuers.find((v) => String(v.id) === String(valuatorUserId));
+    function submit() {
+      action.mutate(
+        { id: l.id, body: { action: modal.type, valuatorUserId: Number(valuatorUserId), roCompany: chosen?.company } },
+        { onSuccess: done }
+      );
+    }
     return (
-      <Shell icon="reassign" tone="good" title="Reassign Lead" sub={sub} onClose={onClose}
+      <Shell icon="reassign" tone="good" title={reassign ? "Reassign Lead" : "Assign Lead"} sub={sub} onClose={onClose}
         foot={<>
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" disabled={action.isPending || !valuer}
-            onClick={() => action.mutate({ id: l.id, body: { action: "reassign", valuator: valuer } }, { onSuccess: done })}>
-            <Icon name="check" size={16} />Reassign
+          <button className="btn btn-primary" disabled={action.isPending || !valuatorUserId} onClick={submit}>
+            <Icon name="check" size={16} />{reassign ? "Reassign" : "Assign"}
           </button>
         </>}>
-        <div className="field"><label>Reassign to valuer</label>
-          <select value={valuer} onChange={(e) => setValuer(e.target.value)}>
-            <option value="">— select valuer —</option>
-            {(valuers || []).map((v) => <option key={v.id} value={v.value}>{v.value}</option>)}
+        <div className="field"><label>Step 1 — RO Company</label>
+          <select value={roCompanyId} onChange={(e) => { setRoCompanyId(e.target.value); setValuatorUserId(""); }}>
+            <option value="">— select RO company —</option>
+            {companies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
-        <div className="field"><label>Reason</label><select><option>Workload balancing</option><option>Geographic proximity</option><option>Specialisation match</option><option>Original valuer unavailable</option></select></div>
+        <div className="field"><label>Step 2 — Valuator</label>
+          <select value={valuatorUserId} disabled={!roCompanyId} onChange={(e) => setValuatorUserId(e.target.value)}>
+            <option value="">{roCompanyId ? "— select valuator —" : "— select a company first —"}</option>
+            {companyValuers.map((v) => <option key={v.id} value={v.id}>{v.name}{v.licenceNo ? ` · ${v.licenceNo}` : ""}</option>)}
+          </select>
+        </div>
         <div className="field"><label>Note (optional)</label><textarea placeholder="Add a handover note…" /></div>
       </Shell>
     );

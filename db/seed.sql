@@ -36,6 +36,22 @@ INSERT INTO dbo.UserTypes (id, company_type_id, name) VALUES
     (19, 3, 'Super Admin'),
     (20, 1, 'Cando Executive');
 
+/* ---------- statustype (lead-stage lookup; code = leads.stage value) ---------- */
+IF NOT EXISTS (SELECT 1 FROM dbo.statustype)
+INSERT INTO dbo.statustype (id, code, label, sort) VALUES
+    (1,  'fresh',           'Fresh',            1),
+    (2,  'ro',              'RO Queue',         2),
+    (3,  'assigned',        'Assigned',         3),
+    (4,  'reassigned',      'Reassigned',       4),
+    (5,  'ro_confirmation', 'RO Confirmation',  5),
+    (6,  'qc',              'QC Review',        6),
+    (7,  'qc_hold',         'QC Hold',          7),
+    (8,  'pricing',         'Pricing',          8),
+    (9,  'completed',       'Completed',        9),
+    (10, 'out_of_tat',      'Out of TAT',       10),
+    (11, 'duplicate',       'Duplicate',        11),
+    (12, 'rejected',        'Rejected',         12);
+
 /* ---------- companies ---------- */
 IF NOT EXISTS (SELECT 1 FROM dbo.companies WHERE name = 'NGD Kwik Check Pvt Ltd')
     INSERT INTO dbo.companies (name, type, spoc_name, status)
@@ -49,6 +65,14 @@ IF NOT EXISTS (SELECT 1 FROM dbo.companies WHERE name = 'ICICI Bank Ltd')
 IF NOT EXISTS (SELECT 1 FROM dbo.companies WHERE name = 'Saraswat Co-operative Bank Ltd')
     INSERT INTO dbo.companies (name, type, spoc_name, status)
     VALUES ('Saraswat Co-operative Bank Ltd', 'Lender · Co-op Bank', 'Shivkumar Sharma', 'Active');
+
+/* RO valuation firms — real company rows so leads can be assigned company → valuator. */
+IF NOT EXISTS (SELECT 1 FROM dbo.companies WHERE name = 'Kwik Check Pvt Ltd')
+    INSERT INTO dbo.companies (name, type, spoc_name, status)
+    VALUES ('Kwik Check Pvt Ltd', 'RO · Valuation Firm', 'Rahul Mehta', 'Active');
+IF NOT EXISTS (SELECT 1 FROM dbo.companies WHERE name = 'Apex Valuers LLP')
+    INSERT INTO dbo.companies (name, type, spoc_name, status)
+    VALUES ('Apex Valuers LLP', 'RO · Valuation Firm', 'Anjali Deshpande', 'Active');
 
 /* ---------- users (password = Password@123) ---------- */
 DECLARE @pwd NVARCHAR(255) = '$2a$12$JSCPVZX6UP6OG0u7pyPVhu3dmUNB25e6dMVcWAtxIFYZK.EzHkJOq';
@@ -79,6 +103,19 @@ IF NOT EXISTS (SELECT 1 FROM dbo.users WHERE email = 'ajay@kwikcheck.in')
 IF NOT EXISTS (SELECT 1 FROM dbo.users WHERE email = 'meena.p@kwikcheck.in')
     INSERT INTO dbo.users (name, email, password_hash, role_id, user_type_id, company_id, phone, status)
     VALUES ('Meena Patil', 'meena.p@kwikcheck.in', @pwd, 1, 1, @hdfc, '99220 14785', 'Active');
+
+/* ---------- RO valuators ↔ RO firm linkage (so company → valuator assign works) ---------- */
+DECLARE @kwikRO BIGINT = (SELECT id FROM dbo.companies WHERE name = 'Kwik Check Pvt Ltd');
+DECLARE @apexRO BIGINT = (SELECT id FROM dbo.companies WHERE name = 'Apex Valuers LLP');
+
+-- Move the seeded RO valuators onto the Kwik Check RO firm (idempotent).
+UPDATE dbo.users SET company_id = @kwikRO
+ WHERE email IN ('rahul@kwikcheck.in', 'ajay@kwikcheck.in') AND company_id <> @kwikRO;
+
+-- A second RO firm's valuator, so the two-step assign has more than one company.
+IF NOT EXISTS (SELECT 1 FROM dbo.users WHERE email = 'anjali@kwikcheck.in')
+    INSERT INTO dbo.users (name, email, password_hash, role_id, user_type_id, company_id, phone, licence_no, status)
+    VALUES ('Anjali Deshpande', 'anjali@kwikcheck.in', @pwd, 2, 8, @apexRO, '90000 00008', 'KC-CPV-0588', 'Active');
 
 /* ---------- master_lookups ---------- */
 IF NOT EXISTS (SELECT 1 FROM dbo.master_lookups WHERE category = 'banks')

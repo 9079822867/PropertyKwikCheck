@@ -177,6 +177,17 @@ CREATE TABLE dbo.photos (
     CONSTRAINT fk_photo_lead FOREIGN KEY (lead_id) REFERENCES dbo.leads(id) ON DELETE CASCADE
 );
 
+/* ---------- statustype (lead-stage lookup; code matches leads.stage) ---------- */
+IF OBJECT_ID('dbo.statustype', 'U') IS NULL
+CREATE TABLE dbo.statustype (
+    id     INT          NOT NULL PRIMARY KEY,
+    code   NVARCHAR(24) NOT NULL,   -- matches the leads.stage enum value
+    label  NVARCHAR(64) NOT NULL,   -- human label shown in lists / dropdowns
+    sort   INT          NOT NULL CONSTRAINT df_statustype_sort   DEFAULT 0,
+    active BIT          NOT NULL CONSTRAINT df_statustype_active DEFAULT 1,
+    CONSTRAINT uq_statustype_code UNIQUE (code)
+);
+
 /* ---------- master lookups ---------- */
 IF OBJECT_ID('dbo.master_lookups', 'U') IS NULL
 CREATE TABLE dbo.master_lookups (

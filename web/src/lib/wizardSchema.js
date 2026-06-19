@@ -24,6 +24,7 @@ const f = (k, label, t = "text", options) => ({ k, label, t, options });
 const INTAKE = [
   f("reportType", "Report Type", "sel", REPORT_TYPES),
   f("propertyType", "Property / Asset Type"),
+  f("leadId", "Report / Lead No."),
   f("loanNo", "Loan / Prospect No."),
   f("claimNo", "Bank Claim / Ref No."),
   f("leadDate", "Lead Date", "date"),
@@ -213,10 +214,10 @@ export function createIntakeSections(assetType) {
   return [
     {
       t: "Case Registration", s: "Core identifiers for this valuation request", c: 3, f: [
-        fx("reportType", "Report Type", "text", { ro: true }),
-        fx("propertyType", "Property / Asset Type", "text", { ro: true }),
+        fx("reportType", "Report Type", "sel", { opt: REPORT_TYPES }),
+        fx("propertyType", "Property / Asset Type"),
         fx("loanNo", "Loan / Prospect No."),
-        fx("leadId", "Report / Lead No.", "text", { ro: true, ph: `${m.prefix}-2026-#####` }),
+        fx("leadId", "Report / Lead No.", "text", { ph: `${m.prefix}-2026-#####` }),
         fx("reqId", "Request ID"),
         fx("claimNo", "Bank Claim / Ref No."),
         fx("leadDate", "Lead Date", "date"),

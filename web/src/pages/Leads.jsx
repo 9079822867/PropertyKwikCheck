@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useLeads } from "../lib/queries.js";
+import { useLeads, useStatusTypes } from "../lib/queries.js";
 import { Spinner, ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 import LeadActionModals from "../components/LeadActionModals.jsx";
@@ -27,9 +27,12 @@ function TypeTag({ l }) {
   const c = TYPE_TAG[l.type] || TYPE_TAG.property;
   return <span className="type-tag" style={{ background: c[0], color: c[1] }}>{l.ptype}</span>;
 }
+// Stage labels come from the statustype lookup (dbo.statustype); tone stays from BUCKET_MAP.
+let STATUS_LABELS = {};
 function StatusPill({ l }) {
   const m = BUCKET_MAP[l.stage];
-  return <span className={`pill pill-${m?.tone || "info"}`}><span className="pdot" />{m?.status || l.stage}</span>;
+  const label = STATUS_LABELS[l.stage] || m?.status || l.stage;
+  return <span className={`pill pill-${m?.tone || "info"}`}><span className="pdot" />{label}</span>;
 }
 function TatBar({ l }) {
   const st = l.tatState === "over" ? "over" : l.tatState === "warn" ? "warn" : "ok";
@@ -97,6 +100,8 @@ export default function Leads() {
   useEffect(() => setSearch(q), [q]);
 
   const { data, isLoading, error, isFetching } = useLeads(bucket, q);
+  const { data: statusTypes } = useStatusTypes();
+  STATUS_LABELS = Object.fromEntries((statusTypes || []).map((s) => [s.code, s.label]));
   const [modal, setModal] = useState(null); // { type, lead }
   const meta = BUCKET_MAP[bucket];
   const cols = colsFor(bucket);
@@ -152,7 +157,7 @@ export default function Leads() {
                         <td>
                           <div className="row-actions">
                             <button className="act" title="Add note" onClick={() => setModal({ type: "note", lead: l })}><Icon name="note" /></button>
-                            {!terminal && <button className="act" title="Reassign" onClick={() => setModal({ type: "reassign", lead: l })}><Icon name="reassign" /></button>}
+                            {!terminal && <button className="act" title={["assigned", "reassigned"].includes(l.stage) ? "Reassign" : "Assign"} onClick={() => setModal({ type: ["assigned", "reassigned"].includes(l.stage) ? "reassign" : "assign", lead: l })}><Icon name="reassign" /></button>}
                             <button className="act" title="Edit lead" onClick={() => navigate(`/leads/${l.id}/edit`)}><Icon name="note" /></button>
                             {!terminal && <button className="act reject" title="Reject" onClick={() => setModal({ type: "reject", lead: l })}><Icon name="reject" /></button>}
                             <button className="act" title="View report" onClick={() => navigate(`/leads/${l.id}`)}><Icon name="view" /></button>

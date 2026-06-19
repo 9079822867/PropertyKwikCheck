@@ -75,6 +75,9 @@ public sealed class UpdateLeadRequest
 {
     [JsonPropertyName("action")] public string? Action { get; set; }
     [JsonPropertyName("valuator")] public string? Valuator { get; set; }
+    [JsonPropertyName("valuatorUserId")] public long? ValuatorUserId { get; set; }
+    [JsonPropertyName("roCompanyId")] public long? RoCompanyId { get; set; }
+    [JsonPropertyName("roCompany")] public string? RoCompany { get; set; }
     [JsonPropertyName("stage")] public string? Stage { get; set; }
     [JsonPropertyName("value")] public long? Value { get; set; }
     [JsonPropertyName("reportStatus")] public string? ReportStatus { get; set; }

@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useLead, useUpdateLead } from "../lib/queries.js";
+import { useLead, useUpdateLead, useStatusTypes } from "../lib/queries.js";
 import api from "../lib/api.js";
 import { Spinner, ErrorBox, Pill } from "../components/ui.jsx";
 import { BUCKET_MAP, TAT_TONE, ASSET_LABEL } from "../lib/constants.js";
 import { inr } from "../lib/format.js";
+import LeadActionModals from "../components/LeadActionModals.jsx";
 
 function Field({ label, value }) {
   return (
@@ -18,12 +20,14 @@ export default function LeadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: lead, isLoading, error } = useLead(id);
+  const { data: statusTypes } = useStatusTypes();
   const update = useUpdateLead(id);
+  const [modal, setModal] = useState(null);
 
-  function reassign() {
-    const valuator = window.prompt("Assign / reassign to valuator (name):", lead?.valuator || "");
-    if (valuator) update.mutate({ action: "reassign", valuator },
-      { onError: (e) => alert(e?.error || "Failed to reassign.") });
+  function changeStage(code) {
+    if (!code || code === lead.stage) return;
+    update.mutate({ stage: code },
+      { onError: (e) => alert(e?.error || "Stage change not allowed.") });
   }
 
   function reject() {
@@ -46,6 +50,9 @@ export default function LeadDetail() {
   if (error) return <ErrorBox error={error} />;
 
   const meta = BUCKET_MAP[lead.stage];
+  const terminal = ["completed", "rejected", "duplicate"].includes(lead.stage);
+  // Already with a valuer → reassign; otherwise the first assignment.
+  const assignType = ["assigned", "reassigned"].includes(lead.stage) ? "reassign" : "assign";
   // Render report data as plain string fields (skip nested objects for now).
   const dataEntries = Object.entries(lead.data ?? {}).filter(
     ([, v]) => v != null && typeof v !== "object"
@@ -68,12 +75,16 @@ export default function LeadDetail() {
             <Pill tone={meta?.tone || "info"}>{meta?.status || lead.stage}</Pill>
             <Pill tone={TAT_TONE[lead.tatState] || "info"}>TAT {lead.tatPct}%</Pill>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <select className="btn btn-ghost btn-sm" style={{ height: 30 }} value={lead.stage}
+              disabled={update.isPending} onChange={(e) => changeStage(e.target.value)} title="Change stage">
+              {(statusTypes || []).map((s) => <option key={s.code} value={s.code}>{s.label}</option>)}
+            </select>
             <button className="btn btn-primary btn-sm" onClick={() => navigate(`/leads/${id}/edit`)}>Edit Report</button>
             <button className="btn btn-ghost btn-sm" onClick={() => window.open(`/report/${id}`, "_blank")}>View Report</button>
-            <button className="btn btn-ghost btn-sm" onClick={reassign} disabled={update.isPending}>Assign / Reassign</button>
+            {!terminal && <button className="btn btn-ghost btn-sm" onClick={() => setModal({ type: assignType, lead })} disabled={update.isPending}>{assignType === "reassign" ? "Reassign" : "Assign"}</button>}
             <button className="btn btn-ghost btn-sm" onClick={downloadPdf}>Download PDF</button>
-            <button className="btn btn-danger btn-sm" onClick={reject} disabled={update.isPending}>Reject</button>
+            {!terminal && <button className="btn btn-danger btn-sm" onClick={reject} disabled={update.isPending}>Reject</button>}
           </div>
         </div>
       </div>
@@ -113,6 +124,8 @@ export default function LeadDetail() {
           )}
         </div>
       </div>
+
+      {modal && <LeadActionModals modal={modal} onClose={() => setModal(null)} />}
     </>
   );
 }

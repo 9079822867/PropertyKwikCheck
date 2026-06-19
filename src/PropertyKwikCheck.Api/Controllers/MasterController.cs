@@ -23,6 +23,14 @@ public sealed class MasterController(IMasterRepository master) : ApiControllerBa
         return Ok(items.Select(i => new { id = i.Id, value = i.Value }));
     }
 
+    /// <summary>Lead-stage lookup (dbo.statustype) backing the lead table + edit stage dropdown.</summary>
+    [HttpGet("statustypes")]
+    public async Task<IActionResult> StatusTypes()
+    {
+        var items = await master.StatusTypesAsync();
+        return Ok(items.Select(s => new { id = s.Id, code = s.Code, label = s.Label, sort = s.Sort }));
+    }
+
     [HttpPost("master")]
     public async Task<IActionResult> Add([FromBody] AddItemRequest req)
     {

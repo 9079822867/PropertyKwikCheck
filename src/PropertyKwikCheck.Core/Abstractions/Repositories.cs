@@ -28,6 +28,9 @@ public interface IUserRepository
     Task TouchLastLoginAsync(long id, DateTime at);
     Task<List<Role>> RolesAsync();
     Task<List<UserType>> UserTypesAsync();
+
+    /// <summary>Active field valuers (RO / Cando valuator user types), optionally filtered to one company.</summary>
+    Task<List<User>> ValuatorsAsync(long? companyId);
 }
 
 public interface ICompanyRepository
@@ -83,4 +86,7 @@ public interface IMasterRepository
     Task<List<(long Id, string Value)>> ItemsAsync(string category);
     Task<long> AddAsync(string category, string value);
     Task DeleteAsync(long id);
+
+    /// <summary>Active lead-stage lookup rows (dbo.statustype), ordered by sort.</summary>
+    Task<List<StatusType>> StatusTypesAsync();
 }

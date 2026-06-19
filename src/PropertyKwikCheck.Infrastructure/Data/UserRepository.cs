@@ -84,4 +84,13 @@ public sealed class UserRepository(IDbConnectionFactory factory) : IUserReposito
         using var conn = await factory.OpenAsync();
         return (await conn.QueryAsync<UserType>("SELECT id, company_type_id, name FROM UserTypes ORDER BY id")).ToList();
     }
+
+    public async Task<List<User>> ValuatorsAsync(long? companyId)
+    {
+        using var conn = await factory.OpenAsync();
+        // Field valuers = RO Valuators (8) + CANDO VALUATOR (17); active only.
+        var where = "WHERE u.deleted_at IS NULL AND u.status = 'Active' AND u.user_type_id IN (8, 17)"
+                  + (companyId is null ? "" : " AND u.company_id = @companyId");
+        return (await conn.QueryAsync<User>($"{SelectJoined} {where} ORDER BY u.name", new { companyId })).ToList();
+    }
 }

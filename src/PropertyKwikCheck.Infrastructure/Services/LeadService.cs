@@ -19,6 +19,7 @@ namespace PropertyKwikCheck.Infrastructure.Services;
 /// </summary>
 public sealed class LeadService(
     ILeadRepository leads,
+    IUserRepository users,
     IAuditRepository audit,
     IClock clock) : ILeadService
 {
@@ -117,8 +118,9 @@ public sealed class LeadService(
 
         switch (request.Action)
         {
+            case "assign":
             case "reassign":
-                await ReassignAsync(lead, request, user, auditCtx, before);
+                await AssignAsync(lead, request, user, auditCtx, before);
                 break;
             case "reject":
                 await RejectAsync(lead, user, auditCtx, before);
@@ -144,19 +146,50 @@ public sealed class LeadService(
 
     // ---- transitions ---------------------------------------------------------
 
-    private async Task ReassignAsync(Lead lead, UpdateLeadRequest request, CurrentUser user,
+    /// <summary>
+    /// Assign / reassign a lead: pick the RO company then a valuator within it (spec: company → valuator).
+    /// Resolves the valuator user (so <c>valuator_user_id</c> + scope are set), denormalises the RO company
+    /// name, and advances the stage (assign → assigned, reassign → reassigned) through the stage machine.
+    /// </summary>
+    private async Task AssignAsync(Lead lead, UpdateLeadRequest request, CurrentUser user,
         AuditContext auditCtx, JsonObject before)
     {
         user.Require(Capability.AssignReassign);
-        if (string.IsNullOrWhiteSpace(request.Valuator))
-            throw AppException.Validation("valuator is required for reassign");
 
-        lead.ValuatorName = request.Valuator;
+        // Resolve the valuator by id (preferred) or fall back to a free-text name.
+        if (request.ValuatorUserId is not null)
+        {
+            var valuer = await users.GetByIdAsync(request.ValuatorUserId.Value)
+                ?? throw AppException.Validation("Unknown valuator");
+            lead.ValuatorUserId = valuer.Id;
+            lead.ValuatorName = valuer.Name;
+            // Default the RO company from the valuator's firm unless one was passed explicitly.
+            if (string.IsNullOrWhiteSpace(request.RoCompany) && !string.IsNullOrWhiteSpace(valuer.CompanyName))
+                lead.RoCompany = valuer.CompanyName;
+        }
+        else if (!string.IsNullOrWhiteSpace(request.Valuator))
+        {
+            lead.ValuatorName = request.Valuator;
+        }
+        else
+        {
+            throw AppException.Validation("valuator is required");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.RoCompany)) lead.RoCompany = request.RoCompany;
+
         var from = lead.Stage;
-        if (lead.Stage == Stage.Assigned)
-            await MoveStage(lead, Stage.Reassigned, user, "Reassigned");
+        var target = request.Action == "reassign" ? Stage.Reassigned : Stage.Assigned;
 
-        await SaveAndAudit(lead, auditCtx, "lead.reassign", before, from);
+        // Only move when it's a real, legal transition; otherwise just update the valuator in place.
+        if (target != lead.Stage && StageMachine.CanTransition(lead.Stage, target))
+        {
+            await MoveStage(lead, target, user, request.Action == "reassign" ? "Reassigned" : "Assigned");
+            if (lead.AssignedOn is null) lead.AssignedOn = clock.UtcNow.Date;
+            lead.TatDue ??= lead.AssignedOn?.AddDays(7);
+        }
+
+        await SaveAndAudit(lead, auditCtx, $"lead.{request.Action}", before, from);
     }
 
     private async Task RejectAsync(Lead lead, CurrentUser user, AuditContext auditCtx, JsonObject before)
