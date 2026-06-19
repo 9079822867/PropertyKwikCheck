@@ -32,13 +32,21 @@ dotnet publish src\PropertyKwikCheck.Api -c Release -o publish
 
 ## Server config (one of)
 
-The DB connection + JWT key must be present in production. Either:
+The committed `src\PropertyKwikCheck.Api\web.config` is **secret-free** (it only removes the
+WebDAV module and wires the ASP.NET Core handler), so a fresh `publish\web.config` will **not**
+contain the DB password or JWT key. Supply them in production via one of:
 
-- the bundled **`web.config`** has them as `<environmentVariables>` (already set in `publish\web.config`), **or**
-- a server-side **`appsettings.Production.json`** (also bundled), **or**
-- IIS app-pool environment variables: `ConnectionStrings__PropertyDb`, `Jwt__SigningKey`.
+- add an `<environmentVariables>` block to `publish\web.config` after publishing (keys
+  `ConnectionStrings__PropertyDb`, `Jwt__SigningKey`, optionally `ASPNETCORE_ENVIRONMENT`), **or**
+- a server-side **`appsettings.Production.json`** (bundled, gitignored), **or**
+- IIS app-pool environment variables.
 
 `ASPNETCORE_ENVIRONMENT` defaults to `Production` — no need to set it explicitly.
+
+> **WebDAV / 405 on DELETE & PUT** — IIS's WebDAVModule answers `DELETE`/`PUT` with
+> `405 Method Not Allowed` before they reach the app. The committed `web.config` removes it
+> (`<remove name="WebDAVModule"/>` + handler removal). If you ever hand-edit the deployed
+> `web.config`, keep those removals or photo/user/company deletes will 405 again.
 
 ## Verify after deploy
 
@@ -47,6 +55,7 @@ GET  https://property.kwikcheck.in/             -> the SPA loads
 GET  https://property.kwikcheck.in/api/health   -> {"status":"ok"}
 POST https://property.kwikcheck.in/api/auth/login {"email":"superadmin@kwikcheck.in","password":"Password@123"} -> token
 GET  https://property.kwikcheck.in/swagger      -> API explorer
+DELETE https://property.kwikcheck.in/api/photos/{id}  (with bearer) -> {"ok":true}, NOT 405
 ```
 
 ## Notes
