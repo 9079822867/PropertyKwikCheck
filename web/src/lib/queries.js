@@ -110,6 +110,16 @@ export function useUpdateCompany(id) {
   });
 }
 
+// ---- public report (no auth required) ---------------------------------------
+export function usePublicReport(id) {
+  return useQuery({
+    queryKey: ["public-report", id],
+    queryFn: async () => (await api.get(`/public/reports/${id}`)).data,
+    enabled: id != null,
+    staleTime: 5 * 60_000,
+  });
+}
+
 // ---- dashboard / meta -------------------------------------------------------
 export function useMeta() {
   return useQuery({

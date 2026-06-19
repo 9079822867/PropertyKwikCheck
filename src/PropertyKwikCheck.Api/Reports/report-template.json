@@ -1,0 +1,254 @@
+{
+  "meta": {
+    "reportNo": "KC-INSP-2026-04812",
+    "confidential": true,
+    "verifyUrl": "verify.kwikcheck.in",
+    "verified": true
+  },
+  "cover": {
+    "brand": "KWIKCHECK",
+    "tagline": "PROPERTY INSPECTION & QUALITY ASSURANCE",
+    "kicker": "PROPERTY INSPECTION REPORT",
+    "propertyName": "Orchid Greens — Tower B",
+    "subtitle": "Flat No. 1204 · 3 BHK Residential Apartment",
+    "address": "Plot 14, LBS Marg, Ghatkopar East, Mumbai, Maharashtra 400077",
+    "addressAsPerDoc": "Flat No. 1204, Tower B, Orchid Greens CHS Ltd., LBS Road, Pant Nagar, Mumbai – 400 075",
+    "inspectionDate": "18 May 2026",
+    "propertyClass": "Residential Flat",
+    "inspectionType": "Full — 142 Points",
+    "reportStatus": "Verified & Issued",
+    "valuationLabel": "Fair Market Value — adopted",
+    "valuationAmount": "₹ 2,15,40,000",
+    "valuationWords": "Rupees Two Crore Fifteen Lakh Forty Thousand only"
+  },
+  "customer": {
+    "applicantName": "Mr. Ankit Sharma",
+    "coApplicantName": "Mrs. Priya Sharma",
+    "contactNumber": "+91 98203 12345",
+    "personMet": "Mr. Ankit Sharma",
+    "relationship": "Self — Applicant",
+    "documentsShown": "Sale Deed, NOC, Tax Receipt"
+  },
+  "plot": {
+    "north": "27.5 ft",
+    "south": "27.5 ft",
+    "east": "32.0 ft",
+    "west": "32.0 ft",
+    "totalArea": "880.00 sq.ft"
+  },
+  "snapshot": [
+    { "label": "Configuration", "value": "3 BHK", "note": "3 Bed · 2 Bath · 1 Balcony" },
+    { "label": "Carpet Area", "value": "985 sq.ft", "note": "Built-up 1,200 · Super 1,420" },
+    { "label": "Year Built", "value": "2014", "note": "Property age — 12 years" },
+    { "label": "Floor Position", "value": "12 of 21", "note": "Mid-rise · 2 lifts serving" },
+    { "label": "Facing", "value": "East", "note": "Vastu compliant layout" },
+    { "label": "Ownership", "value": "Freehold", "note": "Title documents sighted" }
+  ],
+  "inspection": {
+    "inspectedBy": "Rahul Mehta",
+    "inspectedByTitle": "Certified Property Inspector",
+    "licenceId": "KC-CPI-0473",
+    "fieldDate": "18 May 2026",
+    "requestedBy": "HDFC Home Loans",
+    "requestedByNote": "Lending & Mortgage Division",
+    "branch": "Andheri East, Mumbai",
+    "claimNumber": "JKHJKGIH757858",
+    "leadId": "4WCI89798",
+    "verifyUrl": "verify.kwikcheck.in"
+  },
+  "claim": {
+    "claimNo": "JKHJKGIH757858",
+    "flags": [
+      { "label": "Paper Check", "value": "Yes" },
+      { "label": "Locality Enquiry", "value": "Yes" },
+      { "label": "Dispute Related", "value": "No" },
+      { "label": "Redevelopment Plan", "value": "No" },
+      { "label": "Condition Key", "value": "Fair" },
+      { "label": "Current Status", "value": "Self-occupied" }
+    ],
+    "facilities": [
+      { "label": "Number of Rooms", "value": "3 Bedrooms + Living & Dining" },
+      { "label": "Bathrooms", "value": "2 — 1 attached to master" },
+      { "label": "Balconies", "value": "1 — attached to living room" },
+      { "label": "Terrace Access", "value": "Yes — common terrace" },
+      { "label": "Parking Type", "value": "Stack — mechanised" },
+      { "label": "Storage / Utility", "value": "Utility area + dedicated store" },
+      { "label": "2-Wheeler Parking", "value": "1 dedicated slot", "tag": "Allotted" },
+      { "label": "4-Wheeler Parking", "value": "1 dedicated slot", "tag": "Allotted" }
+    ],
+    "amenitiesSummary": "10 of 12 available",
+    "amenities": [
+      { "name": "Lift / Elevator", "available": true },
+      { "name": "24×7 Security", "available": true },
+      { "name": "CCTV Surveillance", "available": true },
+      { "name": "Power Backup", "available": true },
+      { "name": "Gymnasium", "available": true },
+      { "name": "Swimming Pool", "available": false },
+      { "name": "Children's Play Area", "available": true },
+      { "name": "Club House", "available": false },
+      { "name": "Landscaped Garden", "available": true },
+      { "name": "Fire Fighting System", "available": true },
+      { "name": "Rain Water Harvesting", "available": true },
+      { "name": "Sewage Treatment", "available": true }
+    ],
+    "locality": [
+      { "label": "Distance from Branch", "value": "8.4 km" },
+      { "label": "Landmark", "value": "Opp. R City Mall" },
+      { "label": "Class of Locality", "value": "Class A — Prime" },
+      { "label": "Road Type", "value": "Asphalt — arterial" },
+      { "label": "Width of Road", "value": "40 ft" },
+      { "label": "Marketability", "value": "High Demand" },
+      { "label": "Development of Vicinity", "value": "Fully developed — established residential pocket" }
+    ],
+    "connectivity": [
+      { "label": "Railway Station", "value": "Ghatkopar Station", "dist": "1.2 km" },
+      { "label": "Metro Station", "value": "Ghatkopar Metro", "dist": "0.8 km" },
+      { "label": "School Nearby", "value": "Don Bosco School", "dist": "0.6 km" },
+      { "label": "Hospital Nearby", "value": "Siddhivinayak Hospital", "dist": "1.0 km" },
+      { "label": "Bank / ATM", "value": "IDFC First, SBI", "dist": "0.3 km" },
+      { "label": "Airport", "value": "CSMI Airport — T2", "dist": "9.0 km" }
+    ],
+    "structural": [
+      { "label": "Foundation & Structure", "value": "RCC framed — sound", "rating": "GOOD" },
+      { "label": "Walls & Plaster", "value": "Hairline cracks, cosmetic", "rating": "FAIR" },
+      { "label": "Flooring & Tiling", "value": "Hollow / cracked tiles", "rating": "POOR" },
+      { "label": "Ceiling & Slab", "value": "Seepage — master bed", "rating": "POOR" },
+      { "label": "Paint & Finishes", "value": "Fading — repaint due", "rating": "FAIR" },
+      { "label": "Doors & Windows", "value": "Operational, maintained", "rating": "GOOD" }
+    ]
+  },
+  "conditions": {
+    "summary": "18 Components Assessed",
+    "summaryNote": "7 GOOD · 9 FAIR / AVG · 2 POOR",
+    "scores": [
+      { "label": "Interior", "score": "9.0/10", "rating": "GOOD" },
+      { "label": "Exterior", "score": "7.5/10", "rating": "FAIR" },
+      { "label": "Structure", "score": "6.0/10", "rating": "FAIR" },
+      { "label": "Flooring", "score": "4.5/10", "rating": "AVERAGE" }
+    ],
+    "categories": [
+      {
+        "name": "Interior",
+        "score": "9.0/10",
+        "components": [
+          { "name": "Living & Dining Hall", "observation": "Well-maintained; paint intact, no visible defects or dampness.", "rating": "GOOD" },
+          { "name": "Modular Kitchen", "observation": "Cabinetry sound & functional; one loose floor tile near sink unit.", "rating": "FAIR" },
+          { "name": "Master Bedroom", "observation": "Ceiling damp patch approx. 2 sq.ft; waterproofing recommended.", "rating": "AVERAGE" },
+          { "name": "Bedrooms 2 & 3", "observation": "Clean, dry and well-ventilated; fixtures and fittings intact.", "rating": "GOOD" },
+          { "name": "Bathrooms (2 Nos.)", "observation": "Fittings functional, water pressure adequate; minor grouting wear.", "rating": "FAIR" },
+          { "name": "Electrical & Plumbing", "observation": "All points live, MCB panel labelled; minor tap leakage in kitchen.", "rating": "FAIR" }
+        ]
+      },
+      {
+        "name": "Exterior & Common Areas",
+        "score": "7.5/10",
+        "components": [
+          { "name": "External Façade & Walls", "observation": "Plaster and paint in good order; no spalling or exposed rebar.", "rating": "GOOD" },
+          { "name": "Balcony & Railings", "observation": "Structurally sound and anchored; railing paint peeling at edges.", "rating": "FAIR" },
+          { "name": "Lobby & Staircase", "observation": "Clean and well-lit; common-area tiles and handrails intact.", "rating": "GOOD" },
+          { "name": "Terrace & Waterproofing", "observation": "Waterproofing membrane ageing; monitor ahead of next monsoon.", "rating": "AVERAGE" }
+        ]
+      },
+      {
+        "name": "Structural Integrity",
+        "score": "6.0/10",
+        "components": [
+          { "name": "Foundation & Footing", "observation": "No settlement or differential cracking observed at base.", "rating": "GOOD" },
+          { "name": "RCC Frame & Columns", "observation": "Columns and beams sound; no structural cracks detected.", "rating": "GOOD" },
+          { "name": "Internal Walls & Plaster", "observation": "Hairline cracks, cosmetic in nature; no dampness within walls.", "rating": "FAIR" },
+          { "name": "Ceiling Slab & Beams", "observation": "Active seepage in master-bedroom slab; source to be investigated.", "rating": "POOR" }
+        ]
+      },
+      {
+        "name": "Flooring & Tiling",
+        "score": "4.5/10",
+        "components": [
+          { "name": "Living / Dining Tiles", "observation": "Vitrified tiles laid level; isolated hollow sound on tapping.", "rating": "FAIR" },
+          { "name": "Bedroom Flooring", "observation": "Tiles level and well-laid; no chipping, cracking or lippage.", "rating": "GOOD" },
+          { "name": "Kitchen Floor Tiles", "observation": "Cracked and hollow tiles across work zone; relaying recommended.", "rating": "POOR" },
+          { "name": "Bathroom Flooring", "observation": "Anti-skid tiles intact; slight slope deviation toward drain.", "rating": "FAIR" }
+        ]
+      }
+    ],
+    "priorityNote": "Ceiling slab seepage in the master bedroom and cracked kitchen floor tiles should be addressed before occupancy or sanction. Photographic evidence is provided on page 04."
+  },
+  "photos": {
+    "summary": "7 Photographs on Record",
+    "capturedOn": "18 May 2026",
+    "groups": [
+      {
+        "title": "Customer & Site Verification",
+        "count": "3 Photographs",
+        "items": [
+          { "no": "01", "title": "Entrance with Customer", "note": "Inspector with applicant at main entrance", "tag": "ON-SITE", "stamp": "2026-05-18 10:08" },
+          { "no": "02", "title": "Selfie with Property", "note": "Geo-tagged inspector selfie at site", "tag": "ON-SITE", "stamp": "2026-05-18 10:12" },
+          { "no": "03", "title": "Approach Road", "note": "Access route & road condition", "tag": "ON-SITE", "stamp": "2026-05-18 10:05" }
+        ]
+      },
+      {
+        "title": "Site Plans & Documentation",
+        "count": "4 Records",
+        "items": [
+          { "no": "04", "title": "Site Plan", "note": "Approved layout & building plan", "tag": "RECORD", "stamp": "2026-05-18 10:35" },
+          { "no": "05", "title": "Map Image", "note": "Locality map with property pin", "tag": "RECORD", "stamp": "2026-05-18 10:38" },
+          { "no": "06", "title": "Electric Meter", "note": "Meter reading & connection ID", "tag": "RECORD", "stamp": "2026-05-18 11:04" },
+          { "no": "07", "title": "Electricity Bill", "note": "Latest utility bill on record", "tag": "RECORD", "stamp": "2026-05-18 11:06" }
+        ]
+      }
+    ],
+    "footnote": "All photographs are original, unedited and embedded with date, GPS coordinates and capture metadata. High-resolution images are retained in the Kwik Check inspection archive and made available to authorised parties on request, quoting Report No. KC-INSP-2026-04812."
+  },
+  "summary": {
+    "issuedOn": "25 May 2026",
+    "inspectorSummary": "The property at Orchid Greens, Tower B — Flat 1204 is structurally sound and fit for occupancy. The RCC frame, foundation and load-bearing elements show no distress, and interiors are well-maintained. Two items warrant attention before sanction or possession: ceiling seepage in the master bedroom and cracked flooring in the kitchen. Neither affects structural safety, and both are readily rectifiable. With these repairs completed, the property is assessed as a sound and well-located residential asset.",
+    "summaryBy": "Rahul Mehta",
+    "summaryByNote": "Certified Property Inspector · Licence KC-CPI-0473",
+    "finalGrade": "Grade B — Fair, 68 / 100",
+    "valuation": {
+      "fairMarketValue": "₹ 2,15,40,000",
+      "fairMarketWords": "Two Crore Fifteen Lakh Forty Thousand only",
+      "distressLabel": "Distress · 85%",
+      "distressValue": "₹ 1,83,09,000",
+      "distressNote": "Forced sale / distress value",
+      "govtDlcValue": "₹ 1,14,00,000",
+      "govtDlcNote": "As per notified circle rate",
+      "dlcMethod": {
+        "title": "DLC / Circle Rate Method",
+        "tag": "Govt. Notified",
+        "rows": [
+          { "label": "Notified Rate", "value": "₹ 9,500 / sq.ft" },
+          { "label": "Built-up Area", "value": "1,200 sq.ft" },
+          { "label": "Sub-total (Rate × Area)", "value": "₹ 1,14,00,000" },
+          { "label": "Locational Adjustment", "value": "Nil" },
+          { "label": "Govt. DLC Subtotal", "value": "₹ 1,14,00,000" }
+        ],
+        "total": "₹ 1,14,00,000"
+      },
+      "marketMethod": {
+        "title": "Market Value Method",
+        "tag": "Prevailing",
+        "rows": [
+          { "label": "Prevailing Rate", "value": "₹ 17,950 / sq.ft" },
+          { "label": "Built-up Area", "value": "1,200 sq.ft" },
+          { "label": "Sub-total (Rate × Area)", "value": "₹ 2,15,40,000" },
+          { "label": "Floor / Premium Adjustment", "value": "+ 0 %" },
+          { "label": "Market Subtotal", "value": "₹ 2,15,40,000" }
+        ],
+        "total": "₹ 2,15,40,000"
+      }
+    },
+    "scope": "A non-invasive visual inspection of all accessible areas was carried out against Kwik Check's 142-point protocol. No dismantling, excavation or destructive testing was undertaken. Concealed plumbing, wiring and structural elements behind finishes were not examined.",
+    "disclaimer": "This report reflects the property's condition on the date of inspection only and is issued for the requesting party. It is an informed professional opinion, not a guarantee or warranty. NGD Kwik Check Pvt. Ltd. accepts no liability for latent defects not reasonably visible at the time of inspection.",
+    "certification": [
+      { "role": "Inspected By", "name": "Rahul Mehta", "title": "Certified Property Inspector", "licence": "KC-CPI-0473" },
+      { "role": "Reviewed By", "name": "Anjali Deshpande", "title": "Senior Quality Reviewer", "licence": "KC-SQR-0118" },
+      { "role": "Authorised By", "name": "For NGD Kwik Check", "title": "Authorised Signatory", "licence": "Issued 25 May 2026" }
+    ],
+    "contact": {
+      "call": "+91 22 4096 7700",
+      "email": "reports@kwikcheck.in",
+      "web": "www.kwikcheck.in",
+      "office": "Andheri East, Mumbai 400059"
+    }
+  }
+}

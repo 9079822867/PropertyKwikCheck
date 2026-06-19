@@ -70,6 +70,7 @@ export default function LeadDetail() {
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn btn-primary btn-sm" onClick={() => navigate(`/leads/${id}/edit`)}>Edit Report</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => window.open(`/report/${id}`, "_blank")}>View Report</button>
             <button className="btn btn-ghost btn-sm" onClick={reassign} disabled={update.isPending}>Assign / Reassign</button>
             <button className="btn btn-ghost btn-sm" onClick={downloadPdf}>Download PDF</button>
             <button className="btn btn-danger btn-sm" onClick={reject} disabled={update.isPending}>Reject</button>

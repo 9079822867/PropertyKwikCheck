@@ -14,12 +14,15 @@ import CreateCompany from "./pages/CreateCompany.jsx";
 import ScreenPage from "./pages/ScreenPage.jsx";
 import Analytics from "./pages/Analytics.jsx";
 import Settings from "./pages/Settings.jsx";
+import ReportView from "./pages/ReportView.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Public — shareable inspection report, viewable with or without login. */}
+      <Route path="/report/:id" element={<ReportView />} />
       <Route
         element={
           <ProtectedRoute>

@@ -58,6 +58,7 @@ builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IScreenService, ScreenService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IReportPdfService, PropertyKwikCheck.Infrastructure.Pdf.ReportPdfService>();
+builder.Services.AddScoped<PropertyKwikCheck.Api.Services.IPublicReportService, PropertyKwikCheck.Api.Services.PublicReportService>();
 
 // Background TAT recompute (spec §12).
 builder.Services.AddHostedService<TatRecalculationService>();

@@ -17,4 +17,9 @@
     <ProjectReference Include="..\PropertyKwikCheck.Infrastructure\PropertyKwikCheck.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Sample inspection-report payload merged with live lead data by PublicReportService. -->
+    <EmbeddedResource Include="Reports\report-template.json" />
+  </ItemGroup>
+
 </Project>
