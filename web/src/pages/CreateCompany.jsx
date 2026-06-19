@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCreateCompany } from "../lib/queries.js";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCreateCompany, useUpdateCompany, useCompanies } from "../lib/queries.js";
 import { ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 
@@ -11,21 +11,40 @@ const blank = { name: "", type: TYPES[0], gstin: "", pan: "", spoc: "", spocEmai
 
 export default function CreateCompany() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = id != null;
+  const { data: companies } = useCompanies();
   const create = useCreateCompany();
+  const update = useUpdateCompany(id);
+  const saving = isEdit ? update.isPending : create.isPending;
   const [form, setForm] = useState(blank);
   const [err, setErr] = useState(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // On edit, prefill from the list query. The DTO only carries name/type/spoc/status;
+  // the extra fields aren't persisted yet, so they stay blank.
+  useEffect(() => {
+    if (!isEdit || !companies) return;
+    const c = companies.find((x) => String(x.id) === String(id));
+    if (!c) return;
+    setForm((f) => ({ ...f, name: c.name || "", type: c.type || TYPES[0], spoc: c.spoc || "", status: c.status || "Active" }));
+  }, [isEdit, id, companies]);
 
   async function submit() {
     setErr(null);
     if (!form.name) { setErr({ error: "Company name is required." }); return; }
     try {
-      // Backend persists name/type/spoc/status; extra fields are sent for forward-compat.
-      await create.mutateAsync({
-        name: form.name, type: form.type, spoc: form.spoc, status: form.status,
-        gstin: form.gstin, pan: form.pan, spocEmail: form.spocEmail, spocPhone: form.spocPhone,
-        defaultTat: form.defaultTat, address: form.address,
-      });
+      if (isEdit) {
+        // Backend persists name/type/spoc/status only.
+        await update.mutateAsync({ name: form.name, type: form.type, spoc: form.spoc, status: form.status });
+      } else {
+        // Backend persists name/type/spoc/status; extra fields are sent for forward-compat.
+        await create.mutateAsync({
+          name: form.name, type: form.type, spoc: form.spoc, status: form.status,
+          gstin: form.gstin, pan: form.pan, spocEmail: form.spocEmail, spocPhone: form.spocPhone,
+          defaultTat: form.defaultTat, address: form.address,
+        });
+      }
       navigate("/companies");
     } catch (e) { setErr(e); }
   }
@@ -39,9 +58,9 @@ export default function CreateCompany() {
 
   return (
     <>
-      <div className="crumbs"><a onClick={() => navigate("/")}>Home</a><span className="sep">/</span><span>Company</span><span className="sep">/</span><span style={{ color: "var(--navy)" }}>Create Company</span></div>
+      <div className="crumbs"><a onClick={() => navigate("/")}>Home</a><span className="sep">/</span><span>Company</span><span className="sep">/</span><span style={{ color: "var(--navy)" }}>{isEdit ? "Edit Company" : "Create Company"}</span></div>
       <div className="page-head">
-        <div><h1>Create Company</h1><div className="sub">Onboard a new lender or partner.</div></div>
+        <div><h1>{isEdit ? "Edit Company" : "Create Company"}</h1><div className="sub">{isEdit ? "Update lender or partner details." : "Onboard a new lender or partner."}</div></div>
         <button className="btn btn-ghost" onClick={() => navigate("/companies")}>Back</button>
       </div>
 
@@ -78,7 +97,7 @@ export default function CreateCompany() {
 
       <div className="wizard-foot">
         <button className="btn btn-ghost" onClick={() => navigate("/companies")}>Cancel</button>
-        <button className="btn btn-primary" disabled={create.isPending} onClick={submit}><Icon name="check" size={16} />{create.isPending ? "Creating…" : "Create Company"}</button>
+        <button className="btn btn-primary" disabled={saving} onClick={submit}><Icon name="check" size={16} />{saving ? "Saving…" : isEdit ? "Save Changes" : "Create Company"}</button>
       </div>
     </>
   );

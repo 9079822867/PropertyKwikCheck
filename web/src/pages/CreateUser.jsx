@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useRoles, useUserTypes, useCompanies, useCreateUser } from "../lib/queries.js";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useRoles, useUserTypes, useCompanies, useCreateUser, useUpdateUser, useUsers } from "../lib/queries.js";
 import { ErrorBox } from "../components/ui.jsx";
 import Icon from "../components/Icon.jsx";
 
@@ -19,13 +19,33 @@ const STAGES = [
 
 export default function CreateUser() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = id != null;
   const { data: roles } = useRoles();
   const { data: types } = useUserTypes();
   const { data: companies } = useCompanies();
+  const { data: users } = useUsers();
   const create = useCreateUser();
+  const update = useUpdateUser(id);
+  const saving = isEdit ? update.isPending : create.isPending;
   const [form, setForm] = useState(blank);
   const [err, setErr] = useState(null);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // On edit, prefill from the list query. The list DTO carries names, so map
+  // role/userType/company back to their ids via the lookup queries.
+  useEffect(() => {
+    if (!isEdit || !users || !roles || !types) return;
+    const u = users.find((x) => String(x.id) === String(id));
+    if (!u) return;
+    setForm({
+      name: u.name || "", email: u.email || "", phone: u.phone || "",
+      roleId: String(roles.find((r) => r.roleName === u.role)?.id ?? ""),
+      userTypeId: String(types.find((t) => t.name === u.userType)?.id ?? ""),
+      companyId: String((companies || []).find((c) => c.name === u.company)?.id ?? ""),
+      licenceNo: u.licenceNo || "", password: "", status: u.status || "Active",
+    });
+  }, [isEdit, id, users, roles, types, companies]);
 
   const typeName = (types || []).find((t) => String(t.id) === String(form.userTypeId))?.name || "";
 
@@ -33,28 +53,39 @@ export default function CreateUser() {
     setErr(null);
     if (!form.name || !form.email || !form.roleId || !form.userTypeId) { setErr({ error: "Name, email, role and user type are required." }); return; }
     try {
-      await create.mutateAsync({
-        name: form.name, email: form.email, phone: form.phone || null,
-        roleId: Number(form.roleId), userTypeId: Number(form.userTypeId),
-        companyId: form.companyId ? Number(form.companyId) : null,
-        licenceNo: form.licenceNo || null, status: form.status, password: form.password || null,
-      });
+      if (isEdit) {
+        await update.mutateAsync({
+          name: form.name, phone: form.phone || null,
+          roleId: Number(form.roleId), userTypeId: Number(form.userTypeId),
+          companyId: form.companyId ? Number(form.companyId) : null,
+          licenceNo: form.licenceNo || null, status: form.status,
+          password: form.password || null,
+        });
+      } else {
+        await create.mutateAsync({
+          name: form.name, email: form.email, phone: form.phone || null,
+          roleId: Number(form.roleId), userTypeId: Number(form.userTypeId),
+          companyId: form.companyId ? Number(form.companyId) : null,
+          licenceNo: form.licenceNo || null, status: form.status, password: form.password || null,
+        });
+      }
       navigate("/users");
     } catch (e) { setErr(e); }
   }
 
-  const Field = ({ label, k, type = "text", col2 }) => (
+  const Field = ({ label, k, type = "text", col2, disabled }) => (
     <div className={`field ${col2 ? "col2" : ""}`} style={{ margin: 0 }}>
       <label>{label}</label>
-      <input type={type} style={inp} value={form[k]} onChange={(e) => set(k, e.target.value)} />
+      <input type={type} style={{ ...inp, ...(disabled ? { opacity: 0.6, cursor: "not-allowed" } : {}) }}
+        value={form[k]} disabled={disabled} onChange={(e) => set(k, e.target.value)} />
     </div>
   );
 
   return (
     <>
-      <div className="crumbs"><a onClick={() => navigate("/")}>Home</a><span className="sep">/</span><span>User Management</span><span className="sep">/</span><span style={{ color: "var(--navy)" }}>Create New User</span></div>
+      <div className="crumbs"><a onClick={() => navigate("/")}>Home</a><span className="sep">/</span><span>User Management</span><span className="sep">/</span><span style={{ color: "var(--navy)" }}>{isEdit ? "Edit User" : "Create New User"}</span></div>
       <div className="page-head">
-        <div><h1>Create New User</h1><div className="sub">Add a team member and grant a workflow role.</div></div>
+        <div><h1>{isEdit ? "Edit User" : "Create New User"}</h1><div className="sub">{isEdit ? "Update this team member's role and access." : "Add a team member and grant a workflow role."}</div></div>
         <button className="btn btn-ghost" onClick={() => navigate("/users")}>Back</button>
       </div>
 
@@ -67,7 +98,7 @@ export default function CreateUser() {
           <div className="fs-sub">Identity, role and login.</div>
           <div className="g2">
             <Field label="Full Name" k="name" />
-            <Field label="Email" k="email" type="email" />
+            <Field label="Email" k="email" type="email" disabled={isEdit} />
             <Field label="Phone" k="phone" />
             <Field label="Licence No." k="licenceNo" />
             <div className="field" style={{ margin: 0 }}><label>Role</label>
@@ -85,7 +116,7 @@ export default function CreateUser() {
                 <option value="">— none —</option>{(companies || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <Field label="Initial Password (optional)" k="password" type="password" />
+            <Field label={isEdit ? "Reset Password (optional)" : "Initial Password (optional)"} k="password" type="password" />
             <div className="field col2" style={{ margin: 0 }}>
               <label>Status</label>
               <div className="seg">
@@ -111,7 +142,7 @@ export default function CreateUser() {
 
       <div className="wizard-foot">
         <button className="btn btn-ghost" onClick={() => navigate("/users")}>Cancel</button>
-        <button className="btn btn-primary" disabled={create.isPending} onClick={submit}><Icon name="check" size={16} />{create.isPending ? "Creating…" : "Create User"}</button>
+        <button className="btn btn-primary" disabled={saving} onClick={submit}><Icon name="check" size={16} />{saving ? "Saving…" : isEdit ? "Save Changes" : "Create User"}</button>
       </div>
     </>
   );

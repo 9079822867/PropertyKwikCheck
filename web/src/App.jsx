@@ -34,8 +34,10 @@ export default function App() {
         <Route path="leads/:id/edit" element={<LeadWizard />} />
         <Route path="users" element={<Users />} />
         <Route path="users/new" element={<CreateUser />} />
+        <Route path="users/:id/edit" element={<CreateUser />} />
         <Route path="companies" element={<Companies />} />
         <Route path="companies/new" element={<CreateCompany />} />
+        <Route path="companies/:id/edit" element={<CreateCompany />} />
         <Route path="screens/:name" element={<ScreenPage />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />

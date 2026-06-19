@@ -76,6 +76,13 @@ export function useCreateUser() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
   });
 }
+export function useUpdateUser(id) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body) => (await api.patch(`/users/${id}`, body)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["users"] }),
+  });
+}
 export function useDeleteUser() {
   const qc = useQueryClient();
   return useMutation({
@@ -92,6 +99,13 @@ export function useCreateCompany() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (body) => (await api.post("/companies", body)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["companies"] }),
+  });
+}
+export function useUpdateCompany(id) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body) => (await api.patch(`/companies/${id}`, body)).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["companies"] }),
   });
 }

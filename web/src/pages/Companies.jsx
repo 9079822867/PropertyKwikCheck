@@ -33,7 +33,7 @@ export default function Companies() {
                   <td><span className={`pill ${c.status === "Active" ? "pill-good" : "pill-slate"}`}><span className="pdot" />{c.status}</span></td>
                   <td><div className="row-actions">
                     <button className="act" title="View" onClick={() => toast(`Open ${c.name}`)}><Icon name="view" /></button>
-                    <button className="act" title="Edit" onClick={() => toast(`Edit ${c.name}`)}><Icon name="note" /></button>
+                    <button className="act" title="Edit" onClick={() => navigate(`/companies/${c.id}/edit`)}><Icon name="note" /></button>
                   </div></td>
                 </tr>
               ))}

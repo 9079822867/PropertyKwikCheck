@@ -46,7 +46,7 @@ export default function Users() {
                     <td style={{ textAlign: "center" }} className="mono">{u.leads}</td>
                     <td><span className={`pill ${u.status === "Active" ? "pill-good" : "pill-slate"}`}><span className="pdot" />{u.status}</span></td>
                     <td><div className="row-actions">
-                      <button className="act" title="Edit" onClick={() => toast(`Edit user — ${u.name}`)}><Icon name="note" /></button>
+                      <button className="act" title="Edit" onClick={() => navigate(`/users/${u.id}/edit`)}><Icon name="note" /></button>
                       <button className="act" title="Permissions" onClick={() => toast("Manage permissions")}><Icon name="shield" /></button>
                       <button className="act reject" title="Disable" onClick={() => { if (window.confirm(`Disable ${u.name}?`)) del.mutate(u.id); }}><Icon name="del" /></button>
                     </div></td>
