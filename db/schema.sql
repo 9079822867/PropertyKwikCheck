@@ -110,8 +110,6 @@ CREATE TABLE dbo.leads (
     remarks         NVARCHAR(400) NULL,
     hold_remarks    NVARCHAR(400) NULL,
 
-    report_data     NVARCHAR(MAX) NULL,
-
     created_by      BIGINT NULL,
     created_at      DATETIME2 NOT NULL CONSTRAINT df_lead_created DEFAULT SYSUTCDATETIME(),
     updated_at      DATETIME2 NOT NULL CONSTRAINT df_lead_updated DEFAULT SYSUTCDATETIME(),
@@ -129,6 +127,186 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_lead_valuator')
     CREATE INDEX idx_lead_valuator ON dbo.leads(valuator_user_id);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'idx_lead_created')
     CREATE INDEX idx_lead_created  ON dbo.leads(created_at);
+
+/* ---------- lead report data (column-per-field, 1:1 to a lead) ----------
+   The report payload is stored COLUMN-WISE (no JSON blob): each column name matches a
+   report field key (web/src/lib/wizardSchema.js / PropertyKwikCheck.Core.Mapping.ReportFields).
+   Reads re-assemble the JSON via FOR JSON PATH. */
+
+/* Fold any earlier JSON-shaped leadreportdata back into leads.report_data, then drop it so
+   the column-wise table can be (re)created and re-populated below. */
+IF OBJECT_ID('dbo.leadreportdata','U') IS NOT NULL AND COL_LENGTH('dbo.leadreportdata','report_data') IS NOT NULL
+BEGIN
+    IF COL_LENGTH('dbo.leads','report_data') IS NULL
+        ALTER TABLE dbo.leads ADD report_data NVARCHAR(MAX) NULL;
+    EXEC sp_executesql N'UPDATE l SET report_data = r.report_data FROM dbo.leads l JOIN dbo.leadreportdata r ON r.lead_id = l.id WHERE r.report_data IS NOT NULL;';
+    DROP TABLE dbo.leadreportdata;
+END
+
+IF OBJECT_ID('dbo.leadreportdata', 'U') IS NULL
+CREATE TABLE dbo.leadreportdata (
+    id         BIGINT IDENTITY(1,1) PRIMARY KEY,
+    lead_id    BIGINT NOT NULL,
+    [addrActual] NVARCHAR(MAX) NULL, [addrDoc] NVARCHAR(MAX) NULL, [adjustment] NVARCHAR(MAX) NULL, [adoptedRate] NVARCHAR(MAX) NULL,
+    [adoptedValue] NVARCHAR(MAX) NULL, [agriMarketability] NVARCHAR(MAX) NULL, [agriMarketability_r] NVARCHAR(MAX) NULL, [applicant] NVARCHAR(MAX) NULL,
+    [approachAccess] NVARCHAR(MAX) NULL, [areaForVal] NVARCHAR(MAX) NULL, [assignedRO] NVARCHAR(MAX) NULL, [authorisedBy] NVARCHAR(MAX) NULL,
+    [authorisedDate] NVARCHAR(MAX) NULL, [avgRate] NVARCHAR(MAX) NULL, [balcony] NVARCHAR(MAX) NULL, [bathFloor] NVARCHAR(MAX) NULL,
+    [bathrooms] NVARCHAR(MAX) NULL, [bedFloor] NVARCHAR(MAX) NULL, [bedrooms] NVARCHAR(MAX) NULL, [borewellPower] NVARCHAR(MAX) NULL,
+    [branch] NVARCHAR(MAX) NULL, [builtup] NVARCHAR(MAX) NULL, [canalSupport] NVARCHAR(MAX) NULL, [carpet] NVARCHAR(MAX) NULL,
+    [ceiling] NVARCHAR(MAX) NULL, [civicServices] NVARCHAR(MAX) NULL, [civicServices_r] NVARCHAR(MAX) NULL, [claimNo] NVARCHAR(MAX) NULL,
+    [cmp1Rate] NVARCHAR(MAX) NULL, [cmp2Rate] NVARCHAR(MAX) NULL, [cmp3Rate] NVARCHAR(MAX) NULL, [coApplicant] NVARCHAR(MAX) NULL,
+    [conditionKey] NVARCHAR(MAX) NULL, [config] NVARCHAR(MAX) NULL, [connectivity] NVARCHAR(MAX) NULL, [contact] NVARCHAR(MAX) NULL,
+    [cornerAdv] NVARCHAR(MAX) NULL, [croppingPattern] NVARCHAR(MAX) NULL, [croppingPattern_r] NVARCHAR(MAX) NULL, [currentStatus] NVARCHAR(MAX) NULL,
+    [demand] NVARCHAR(MAX) NULL, [devActivity] NVARCHAR(MAX) NULL, [dimE] NVARCHAR(MAX) NULL, [dimN] NVARCHAR(MAX) NULL,
+    [dimS] NVARCHAR(MAX) NULL, [dimTotal] NVARCHAR(MAX) NULL, [dimW] NVARCHAR(MAX) NULL, [disclaimer] NVARCHAR(MAX) NULL,
+    [disputeRelated] NVARCHAR(MAX) NULL, [distBranch] NVARCHAR(MAX) NULL, [distHighway] NVARCHAR(MAX) NULL, [distHospital] NVARCHAR(MAX) NULL,
+    [distMainRoad] NVARCHAR(MAX) NULL, [distMandi] NVARCHAR(MAX) NULL, [distMarket] NVARCHAR(MAX) NULL, [distMetalledRoad] NVARCHAR(MAX) NULL,
+    [distSchool] NVARCHAR(MAX) NULL, [distVillageAbadi] NVARCHAR(MAX) NULL, [distressObs] NVARCHAR(MAX) NULL, [distressPct] NVARCHAR(MAX) NULL,
+    [distressValue] NVARCHAR(MAX) NULL, [districtState] NVARCHAR(MAX) NULL, [dlcAdjust] NVARCHAR(MAX) NULL, [dlcArea] NVARCHAR(MAX) NULL,
+    [dlcBasis] NVARCHAR(MAX) NULL, [dlcRate] NVARCHAR(MAX) NULL, [dlcUsedFor] NVARCHAR(MAX) NULL, [dlcValue] NVARCHAR(MAX) NULL,
+    [docType] NVARCHAR(MAX) NULL, [docsRelied] NVARCHAR(MAX) NULL, [docsShown] NVARCHAR(MAX) NULL, [electrical] NVARCHAR(MAX) NULL,
+    [encumbrance] NVARCHAR(MAX) NULL, [execEmail] NVARCHAR(MAX) NULL, [execName] NVARCHAR(MAX) NULL, [execPhone] NVARCHAR(MAX) NULL,
+    [facade] NVARCHAR(MAX) NULL, [facing] NVARCHAR(MAX) NULL, [fairMarketValue] NVARCHAR(MAX) NULL, [floorNo] NVARCHAR(MAX) NULL,
+    [foundation] NVARCHAR(MAX) NULL, [frontageDepth] NVARCHAR(MAX) NULL, [gps] NVARCHAR(MAX) NULL, [htLine] NVARCHAR(MAX) NULL,
+    [incomeDependence] NVARCHAR(MAX) NULL, [inspectedBy] NVARCHAR(MAX) NULL, [inspectedDate] NVARCHAR(MAX) NULL, [inspectedLicence] NVARCHAR(MAX) NULL,
+    [inspectionDate] NVARCHAR(MAX) NULL, [intWalls] NVARCHAR(MAX) NULL, [interiorLocation] NVARCHAR(MAX) NULL, [irrigation] NVARCHAR(MAX) NULL,
+    [irrigation_r] NVARCHAR(MAX) NULL, [issuedDate] NVARCHAR(MAX) NULL, [jamabandiMap] NVARCHAR(MAX) NULL, [jamabandiYear] NVARCHAR(MAX) NULL,
+    [khasraGirdawari] NVARCHAR(MAX) NULL, [khasraNumber] NVARCHAR(MAX) NULL, [khataNumber] NVARCHAR(MAX) NULL, [khatedarName] NVARCHAR(MAX) NULL,
+    [kitchen] NVARCHAR(MAX) NULL, [kitchenFloor] NVARCHAR(MAX) NULL, [landArea] NVARCHAR(MAX) NULL, [landCeiling] NVARCHAR(MAX) NULL,
+    [landUse] NVARCHAR(MAX) NULL, [landUseRestriction] NVARCHAR(MAX) NULL, [landUse_r] NVARCHAR(MAX) NULL, [landmark] NVARCHAR(MAX) NULL,
+    [layoutPlan] NVARCHAR(MAX) NULL, [leadDate] NVARCHAR(MAX) NULL, [leadId] NVARCHAR(MAX) NULL, [lender] NVARCHAR(MAX) NULL,
+    [liquidityObs] NVARCHAR(MAX) NULL, [livingFloor] NVARCHAR(MAX) NULL, [livingHall] NVARCHAR(MAX) NULL, [loanNo] NVARCHAR(MAX) NULL,
+    [loanType] NVARCHAR(MAX) NULL, [lobby] NVARCHAR(MAX) NULL, [localityClass] NVARCHAR(MAX) NULL, [localityEnquiry] NVARCHAR(MAX) NULL,
+    [localityStatus] NVARCHAR(MAX) NULL, [localityStatus_r] NVARCHAR(MAX) NULL, [locationRemark] NVARCHAR(MAX) NULL, [marketability] NVARCHAR(MAX) NULL,
+    [marketability_r] NVARCHAR(MAX) NULL, [masterBed] NVARCHAR(MAX) NULL, [mutationEntry] NVARCHAR(MAX) NULL, [mutationEntryT] NVARCHAR(MAX) NULL,
+    [mutationStatus] NVARCHAR(MAX) NULL, [nearestTown] NVARCHAR(MAX) NULL, [overallRisk] NVARCHAR(MAX) NULL, [ownerName] NVARCHAR(MAX) NULL,
+    [ownership] NVARCHAR(MAX) NULL, [ownershipType] NVARCHAR(MAX) NULL, [paperCheck] NVARCHAR(MAX) NULL, [personMet] NVARCHAR(MAX) NULL,
+    [plotArea] NVARCHAR(MAX) NULL, [plotNumber] NVARCHAR(MAX) NULL, [powerConnection] NVARCHAR(MAX) NULL, [powerConnection_r] NVARCHAR(MAX) NULL,
+    [propertyType] NVARCHAR(MAX) NULL, [rccFrame] NVARCHAR(MAX) NULL, [realizablePct] NVARCHAR(MAX) NULL, [realizableValue] NVARCHAR(MAX) NULL,
+    [redevelopment] NVARCHAR(MAX) NULL, [regNumber] NVARCHAR(MAX) NULL, [regOffice] NVARCHAR(MAX) NULL, [relationship] NVARCHAR(MAX) NULL,
+    [remarks] NVARCHAR(MAX) NULL, [reportStatus] NVARCHAR(MAX) NULL, [reportType] NVARCHAR(MAX) NULL, [reqId] NVARCHAR(MAX) NULL,
+    [restrictedBuyer] NVARCHAR(MAX) NULL, [revenueOffice] NVARCHAR(MAX) NULL, [reviewedBy] NVARCHAR(MAX) NULL, [reviewedDate] NVARCHAR(MAX) NULL,
+    [reviewedLicence] NVARCHAR(MAX) NULL, [roCompany] NVARCHAR(MAX) NULL, [roadType] NVARCHAR(MAX) NULL, [roadWidth] NVARCHAR(MAX) NULL,
+    [saleDeedCopy] NVARCHAR(MAX) NULL, [saleDeedDate] NVARCHAR(MAX) NULL, [scAccessibility] NVARCHAR(MAX) NULL, [scDevelopment] NVARCHAR(MAX) NULL,
+    [scExterior] NVARCHAR(MAX) NULL, [scFlooring] NVARCHAR(MAX) NULL, [scInterior] NVARCHAR(MAX) NULL, [scIrrigation] NVARCHAR(MAX) NULL,
+    [scLiquidity] NVARCHAR(MAX) NULL, [scMarketability] NVARCHAR(MAX) NULL, [scSoil] NVARCHAR(MAX) NULL, [scStructure] NVARCHAR(MAX) NULL,
+    [scopeLimit] NVARCHAR(MAX) NULL, [soilFertility] NVARCHAR(MAX) NULL, [soilType] NVARCHAR(MAX) NULL, [soilType_r] NVARCHAR(MAX) NULL,
+    [source] NVARCHAR(MAX) NULL, [structuralCondition] NVARCHAR(MAX) NULL, [superBuiltup] NVARCHAR(MAX) NULL, [surrDevelopment] NVARCHAR(MAX) NULL,
+    [surrDevelopment_r] NVARCHAR(MAX) NULL, [surveyKhasra] NVARCHAR(MAX) NULL, [tatDue] NVARCHAR(MAX) NULL, [taxReceipt] NVARCHAR(MAX) NULL,
+    [tehsil] NVARCHAR(MAX) NULL, [tenureType] NVARCHAR(MAX) NULL, [terrace] NVARCHAR(MAX) NULL, [topoDrainage] NVARCHAR(MAX) NULL,
+    [topography] NVARCHAR(MAX) NULL, [totalFloors] NVARCHAR(MAX) NULL, [vBoundary] NVARCHAR(MAX) NULL, [vBunds] NVARCHAR(MAX) NULL,
+    [vCultivation] NVARCHAR(MAX) NULL, [vEncroach] NVARCHAR(MAX) NULL, [vIdentified] NVARCHAR(MAX) NULL, [vLocated] NVARCHAR(MAX) NULL,
+    [vPossession] NVARCHAR(MAX) NULL, [vVacant] NVARCHAR(MAX) NULL, [valStatement] NVARCHAR(MAX) NULL, [valuationPurpose] NVARCHAR(MAX) NULL,
+    [village] NVARCHAR(MAX) NULL, [villageColony] NVARCHAR(MAX) NULL, [yearBuilt] NVARCHAR(MAX) NULL,
+    updated_at DATETIME2 NOT NULL CONSTRAINT df_lrd_updated DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT uq_lrd_lead UNIQUE (lead_id),
+    CONSTRAINT fk_lrd_lead FOREIGN KEY (lead_id) REFERENCES dbo.leads(id) ON DELETE CASCADE
+);
+
+/* Explode any legacy leads.report_data JSON into the column-wise table, then drop it.
+   Dynamic SQL: the column is absent on fresh installs (would fail to compile inline). */
+IF COL_LENGTH('dbo.leads', 'report_data') IS NOT NULL
+EXEC sp_executesql N'
+    INSERT INTO dbo.leadreportdata (lead_id,
+            [addrActual], [addrDoc], [adjustment], [adoptedRate], [adoptedValue], [agriMarketability], [agriMarketability_r], [applicant],
+            [approachAccess], [areaForVal], [assignedRO], [authorisedBy], [authorisedDate], [avgRate], [balcony], [bathFloor],
+            [bathrooms], [bedFloor], [bedrooms], [borewellPower], [branch], [builtup], [canalSupport], [carpet],
+            [ceiling], [civicServices], [civicServices_r], [claimNo], [cmp1Rate], [cmp2Rate], [cmp3Rate], [coApplicant],
+            [conditionKey], [config], [connectivity], [contact], [cornerAdv], [croppingPattern], [croppingPattern_r], [currentStatus],
+            [demand], [devActivity], [dimE], [dimN], [dimS], [dimTotal], [dimW], [disclaimer],
+            [disputeRelated], [distBranch], [distHighway], [distHospital], [distMainRoad], [distMandi], [distMarket], [distMetalledRoad],
+            [distSchool], [distVillageAbadi], [distressObs], [distressPct], [distressValue], [districtState], [dlcAdjust], [dlcArea],
+            [dlcBasis], [dlcRate], [dlcUsedFor], [dlcValue], [docType], [docsRelied], [docsShown], [electrical],
+            [encumbrance], [execEmail], [execName], [execPhone], [facade], [facing], [fairMarketValue], [floorNo],
+            [foundation], [frontageDepth], [gps], [htLine], [incomeDependence], [inspectedBy], [inspectedDate], [inspectedLicence],
+            [inspectionDate], [intWalls], [interiorLocation], [irrigation], [irrigation_r], [issuedDate], [jamabandiMap], [jamabandiYear],
+            [khasraGirdawari], [khasraNumber], [khataNumber], [khatedarName], [kitchen], [kitchenFloor], [landArea], [landCeiling],
+            [landUse], [landUseRestriction], [landUse_r], [landmark], [layoutPlan], [leadDate], [leadId], [lender],
+            [liquidityObs], [livingFloor], [livingHall], [loanNo], [loanType], [lobby], [localityClass], [localityEnquiry],
+            [localityStatus], [localityStatus_r], [locationRemark], [marketability], [marketability_r], [masterBed], [mutationEntry], [mutationEntryT],
+            [mutationStatus], [nearestTown], [overallRisk], [ownerName], [ownership], [ownershipType], [paperCheck], [personMet],
+            [plotArea], [plotNumber], [powerConnection], [powerConnection_r], [propertyType], [rccFrame], [realizablePct], [realizableValue],
+            [redevelopment], [regNumber], [regOffice], [relationship], [remarks], [reportStatus], [reportType], [reqId],
+            [restrictedBuyer], [revenueOffice], [reviewedBy], [reviewedDate], [reviewedLicence], [roCompany], [roadType], [roadWidth],
+            [saleDeedCopy], [saleDeedDate], [scAccessibility], [scDevelopment], [scExterior], [scFlooring], [scInterior], [scIrrigation],
+            [scLiquidity], [scMarketability], [scSoil], [scStructure], [scopeLimit], [soilFertility], [soilType], [soilType_r],
+            [source], [structuralCondition], [superBuiltup], [surrDevelopment], [surrDevelopment_r], [surveyKhasra], [tatDue], [taxReceipt],
+            [tehsil], [tenureType], [terrace], [topoDrainage], [topography], [totalFloors], [vBoundary], [vBunds],
+            [vCultivation], [vEncroach], [vIdentified], [vLocated], [vPossession], [vVacant], [valStatement], [valuationPurpose],
+            [village], [villageColony], [yearBuilt])
+    SELECT l.id,
+            JSON_VALUE(l.report_data, ''$.addrActual''), JSON_VALUE(l.report_data, ''$.addrDoc''), JSON_VALUE(l.report_data, ''$.adjustment''),
+            JSON_VALUE(l.report_data, ''$.adoptedRate''), JSON_VALUE(l.report_data, ''$.adoptedValue''), JSON_VALUE(l.report_data, ''$.agriMarketability''),
+            JSON_VALUE(l.report_data, ''$.agriMarketability_r''), JSON_VALUE(l.report_data, ''$.applicant''), JSON_VALUE(l.report_data, ''$.approachAccess''),
+            JSON_VALUE(l.report_data, ''$.areaForVal''), JSON_VALUE(l.report_data, ''$.assignedRO''), JSON_VALUE(l.report_data, ''$.authorisedBy''),
+            JSON_VALUE(l.report_data, ''$.authorisedDate''), JSON_VALUE(l.report_data, ''$.avgRate''), JSON_VALUE(l.report_data, ''$.balcony''),
+            JSON_VALUE(l.report_data, ''$.bathFloor''), JSON_VALUE(l.report_data, ''$.bathrooms''), JSON_VALUE(l.report_data, ''$.bedFloor''),
+            JSON_VALUE(l.report_data, ''$.bedrooms''), JSON_VALUE(l.report_data, ''$.borewellPower''), JSON_VALUE(l.report_data, ''$.branch''),
+            JSON_VALUE(l.report_data, ''$.builtup''), JSON_VALUE(l.report_data, ''$.canalSupport''), JSON_VALUE(l.report_data, ''$.carpet''),
+            JSON_VALUE(l.report_data, ''$.ceiling''), JSON_VALUE(l.report_data, ''$.civicServices''), JSON_VALUE(l.report_data, ''$.civicServices_r''),
+            JSON_VALUE(l.report_data, ''$.claimNo''), JSON_VALUE(l.report_data, ''$.cmp1Rate''), JSON_VALUE(l.report_data, ''$.cmp2Rate''),
+            JSON_VALUE(l.report_data, ''$.cmp3Rate''), JSON_VALUE(l.report_data, ''$.coApplicant''), JSON_VALUE(l.report_data, ''$.conditionKey''),
+            JSON_VALUE(l.report_data, ''$.config''), JSON_VALUE(l.report_data, ''$.connectivity''), JSON_VALUE(l.report_data, ''$.contact''),
+            JSON_VALUE(l.report_data, ''$.cornerAdv''), JSON_VALUE(l.report_data, ''$.croppingPattern''), JSON_VALUE(l.report_data, ''$.croppingPattern_r''),
+            JSON_VALUE(l.report_data, ''$.currentStatus''), JSON_VALUE(l.report_data, ''$.demand''), JSON_VALUE(l.report_data, ''$.devActivity''),
+            JSON_VALUE(l.report_data, ''$.dimE''), JSON_VALUE(l.report_data, ''$.dimN''), JSON_VALUE(l.report_data, ''$.dimS''),
+            JSON_VALUE(l.report_data, ''$.dimTotal''), JSON_VALUE(l.report_data, ''$.dimW''), JSON_VALUE(l.report_data, ''$.disclaimer''),
+            JSON_VALUE(l.report_data, ''$.disputeRelated''), JSON_VALUE(l.report_data, ''$.distBranch''), JSON_VALUE(l.report_data, ''$.distHighway''),
+            JSON_VALUE(l.report_data, ''$.distHospital''), JSON_VALUE(l.report_data, ''$.distMainRoad''), JSON_VALUE(l.report_data, ''$.distMandi''),
+            JSON_VALUE(l.report_data, ''$.distMarket''), JSON_VALUE(l.report_data, ''$.distMetalledRoad''), JSON_VALUE(l.report_data, ''$.distSchool''),
+            JSON_VALUE(l.report_data, ''$.distVillageAbadi''), JSON_VALUE(l.report_data, ''$.distressObs''), JSON_VALUE(l.report_data, ''$.distressPct''),
+            JSON_VALUE(l.report_data, ''$.distressValue''), JSON_VALUE(l.report_data, ''$.districtState''), JSON_VALUE(l.report_data, ''$.dlcAdjust''),
+            JSON_VALUE(l.report_data, ''$.dlcArea''), JSON_VALUE(l.report_data, ''$.dlcBasis''), JSON_VALUE(l.report_data, ''$.dlcRate''),
+            JSON_VALUE(l.report_data, ''$.dlcUsedFor''), JSON_VALUE(l.report_data, ''$.dlcValue''), JSON_VALUE(l.report_data, ''$.docType''),
+            JSON_VALUE(l.report_data, ''$.docsRelied''), JSON_VALUE(l.report_data, ''$.docsShown''), JSON_VALUE(l.report_data, ''$.electrical''),
+            JSON_VALUE(l.report_data, ''$.encumbrance''), JSON_VALUE(l.report_data, ''$.execEmail''), JSON_VALUE(l.report_data, ''$.execName''),
+            JSON_VALUE(l.report_data, ''$.execPhone''), JSON_VALUE(l.report_data, ''$.facade''), JSON_VALUE(l.report_data, ''$.facing''),
+            JSON_VALUE(l.report_data, ''$.fairMarketValue''), JSON_VALUE(l.report_data, ''$.floorNo''), JSON_VALUE(l.report_data, ''$.foundation''),
+            JSON_VALUE(l.report_data, ''$.frontageDepth''), JSON_VALUE(l.report_data, ''$.gps''), JSON_VALUE(l.report_data, ''$.htLine''),
+            JSON_VALUE(l.report_data, ''$.incomeDependence''), JSON_VALUE(l.report_data, ''$.inspectedBy''), JSON_VALUE(l.report_data, ''$.inspectedDate''),
+            JSON_VALUE(l.report_data, ''$.inspectedLicence''), JSON_VALUE(l.report_data, ''$.inspectionDate''), JSON_VALUE(l.report_data, ''$.intWalls''),
+            JSON_VALUE(l.report_data, ''$.interiorLocation''), JSON_VALUE(l.report_data, ''$.irrigation''), JSON_VALUE(l.report_data, ''$.irrigation_r''),
+            JSON_VALUE(l.report_data, ''$.issuedDate''), JSON_VALUE(l.report_data, ''$.jamabandiMap''), JSON_VALUE(l.report_data, ''$.jamabandiYear''),
+            JSON_VALUE(l.report_data, ''$.khasraGirdawari''), JSON_VALUE(l.report_data, ''$.khasraNumber''), JSON_VALUE(l.report_data, ''$.khataNumber''),
+            JSON_VALUE(l.report_data, ''$.khatedarName''), JSON_VALUE(l.report_data, ''$.kitchen''), JSON_VALUE(l.report_data, ''$.kitchenFloor''),
+            JSON_VALUE(l.report_data, ''$.landArea''), JSON_VALUE(l.report_data, ''$.landCeiling''), JSON_VALUE(l.report_data, ''$.landUse''),
+            JSON_VALUE(l.report_data, ''$.landUseRestriction''), JSON_VALUE(l.report_data, ''$.landUse_r''), JSON_VALUE(l.report_data, ''$.landmark''),
+            JSON_VALUE(l.report_data, ''$.layoutPlan''), JSON_VALUE(l.report_data, ''$.leadDate''), JSON_VALUE(l.report_data, ''$.leadId''),
+            JSON_VALUE(l.report_data, ''$.lender''), JSON_VALUE(l.report_data, ''$.liquidityObs''), JSON_VALUE(l.report_data, ''$.livingFloor''),
+            JSON_VALUE(l.report_data, ''$.livingHall''), JSON_VALUE(l.report_data, ''$.loanNo''), JSON_VALUE(l.report_data, ''$.loanType''),
+            JSON_VALUE(l.report_data, ''$.lobby''), JSON_VALUE(l.report_data, ''$.localityClass''), JSON_VALUE(l.report_data, ''$.localityEnquiry''),
+            JSON_VALUE(l.report_data, ''$.localityStatus''), JSON_VALUE(l.report_data, ''$.localityStatus_r''), JSON_VALUE(l.report_data, ''$.locationRemark''),
+            JSON_VALUE(l.report_data, ''$.marketability''), JSON_VALUE(l.report_data, ''$.marketability_r''), JSON_VALUE(l.report_data, ''$.masterBed''),
+            JSON_VALUE(l.report_data, ''$.mutationEntry''), JSON_VALUE(l.report_data, ''$.mutationEntryT''), JSON_VALUE(l.report_data, ''$.mutationStatus''),
+            JSON_VALUE(l.report_data, ''$.nearestTown''), JSON_VALUE(l.report_data, ''$.overallRisk''), JSON_VALUE(l.report_data, ''$.ownerName''),
+            JSON_VALUE(l.report_data, ''$.ownership''), JSON_VALUE(l.report_data, ''$.ownershipType''), JSON_VALUE(l.report_data, ''$.paperCheck''),
+            JSON_VALUE(l.report_data, ''$.personMet''), JSON_VALUE(l.report_data, ''$.plotArea''), JSON_VALUE(l.report_data, ''$.plotNumber''),
+            JSON_VALUE(l.report_data, ''$.powerConnection''), JSON_VALUE(l.report_data, ''$.powerConnection_r''), JSON_VALUE(l.report_data, ''$.propertyType''),
+            JSON_VALUE(l.report_data, ''$.rccFrame''), JSON_VALUE(l.report_data, ''$.realizablePct''), JSON_VALUE(l.report_data, ''$.realizableValue''),
+            JSON_VALUE(l.report_data, ''$.redevelopment''), JSON_VALUE(l.report_data, ''$.regNumber''), JSON_VALUE(l.report_data, ''$.regOffice''),
+            JSON_VALUE(l.report_data, ''$.relationship''), JSON_VALUE(l.report_data, ''$.remarks''), JSON_VALUE(l.report_data, ''$.reportStatus''),
+            JSON_VALUE(l.report_data, ''$.reportType''), JSON_VALUE(l.report_data, ''$.reqId''), JSON_VALUE(l.report_data, ''$.restrictedBuyer''),
+            JSON_VALUE(l.report_data, ''$.revenueOffice''), JSON_VALUE(l.report_data, ''$.reviewedBy''), JSON_VALUE(l.report_data, ''$.reviewedDate''),
+            JSON_VALUE(l.report_data, ''$.reviewedLicence''), JSON_VALUE(l.report_data, ''$.roCompany''), JSON_VALUE(l.report_data, ''$.roadType''),
+            JSON_VALUE(l.report_data, ''$.roadWidth''), JSON_VALUE(l.report_data, ''$.saleDeedCopy''), JSON_VALUE(l.report_data, ''$.saleDeedDate''),
+            JSON_VALUE(l.report_data, ''$.scAccessibility''), JSON_VALUE(l.report_data, ''$.scDevelopment''), JSON_VALUE(l.report_data, ''$.scExterior''),
+            JSON_VALUE(l.report_data, ''$.scFlooring''), JSON_VALUE(l.report_data, ''$.scInterior''), JSON_VALUE(l.report_data, ''$.scIrrigation''),
+            JSON_VALUE(l.report_data, ''$.scLiquidity''), JSON_VALUE(l.report_data, ''$.scMarketability''), JSON_VALUE(l.report_data, ''$.scSoil''),
+            JSON_VALUE(l.report_data, ''$.scStructure''), JSON_VALUE(l.report_data, ''$.scopeLimit''), JSON_VALUE(l.report_data, ''$.soilFertility''),
+            JSON_VALUE(l.report_data, ''$.soilType''), JSON_VALUE(l.report_data, ''$.soilType_r''), JSON_VALUE(l.report_data, ''$.source''),
+            JSON_VALUE(l.report_data, ''$.structuralCondition''), JSON_VALUE(l.report_data, ''$.superBuiltup''), JSON_VALUE(l.report_data, ''$.surrDevelopment''),
+            JSON_VALUE(l.report_data, ''$.surrDevelopment_r''), JSON_VALUE(l.report_data, ''$.surveyKhasra''), JSON_VALUE(l.report_data, ''$.tatDue''),
+            JSON_VALUE(l.report_data, ''$.taxReceipt''), JSON_VALUE(l.report_data, ''$.tehsil''), JSON_VALUE(l.report_data, ''$.tenureType''),
+            JSON_VALUE(l.report_data, ''$.terrace''), JSON_VALUE(l.report_data, ''$.topoDrainage''), JSON_VALUE(l.report_data, ''$.topography''),
+            JSON_VALUE(l.report_data, ''$.totalFloors''), JSON_VALUE(l.report_data, ''$.vBoundary''), JSON_VALUE(l.report_data, ''$.vBunds''),
+            JSON_VALUE(l.report_data, ''$.vCultivation''), JSON_VALUE(l.report_data, ''$.vEncroach''), JSON_VALUE(l.report_data, ''$.vIdentified''),
+            JSON_VALUE(l.report_data, ''$.vLocated''), JSON_VALUE(l.report_data, ''$.vPossession''), JSON_VALUE(l.report_data, ''$.vVacant''),
+            JSON_VALUE(l.report_data, ''$.valStatement''), JSON_VALUE(l.report_data, ''$.valuationPurpose''), JSON_VALUE(l.report_data, ''$.village''),
+            JSON_VALUE(l.report_data, ''$.villageColony''), JSON_VALUE(l.report_data, ''$.yearBuilt'')
+    FROM dbo.leads l
+    WHERE l.report_data IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM dbo.leadreportdata r WHERE r.lead_id = l.id);
+    ALTER TABLE dbo.leads DROP COLUMN report_data;';
 
 /* ---------- lead stage history ---------- */
 IF OBJECT_ID('dbo.lead_stage_history', 'U') IS NULL

@@ -1,23 +1,33 @@
+using System.Data;
+using System.Text.Json.Nodes;
 using Dapper;
 using PropertyKwikCheck.Core.Abstractions;
 using PropertyKwikCheck.Core.Domain;
+using PropertyKwikCheck.Core.Mapping;
 using PropertyKwikCheck.Core.Rbac;
 
 namespace PropertyKwikCheck.Infrastructure.Data;
 
 public sealed class LeadRepository(IDbConnectionFactory factory) : ILeadRepository
 {
-    private const string Columns = """
-        id, req_id, asset_family, property_type, stage, report_status,
-        applicant, co_applicant, contact, pin, location,
-        lender_company_id, lender_name, branch,
-        valuator_user_id, valuator_name, ro_company,
-        exec_name, exec_phone, exec_email,
-        loan_no, claim_no, source, reg_no,
-        lead_date, assigned_on, inspection_date, issued_date, tat_due, tat_pct, tat_state,
-        value, remarks, hold_remarks, report_data,
-        created_by, created_at, updated_at, deleted_at
-        """;
+    // The report payload is stored column-wise in dbo.leadreportdata (one column per field).
+    // On read we re-assemble those columns back into the report JSON with FOR JSON PATH —
+    // null columns are omitted, so the shape matches the old JSON blob exactly.
+    private static readonly string ReportJson =
+        $"(SELECT {string.Join(", ", ReportFields.All.Select(k => $"r.[{k}]"))} " +
+        "FROM leadreportdata r WHERE r.lead_id = leads.id FOR JSON PATH, WITHOUT_ARRAY_WRAPPER) AS report_data";
+
+    private static readonly string Columns =
+        "id, req_id, asset_family, property_type, stage, report_status, " +
+        "applicant, co_applicant, contact, pin, location, " +
+        "lender_company_id, lender_name, branch, " +
+        "valuator_user_id, valuator_name, ro_company, " +
+        "exec_name, exec_phone, exec_email, " +
+        "loan_no, claim_no, source, reg_no, " +
+        "lead_date, assigned_on, inspection_date, issued_date, tat_due, tat_pct, tat_state, " +
+        "value, remarks, hold_remarks, " +
+        ReportJson + ", " +
+        "created_by, created_at, updated_at, deleted_at";
 
     public async Task<Lead?> GetByIdAsync(long id)
     {
@@ -80,7 +90,7 @@ public sealed class LeadRepository(IDbConnectionFactory factory) : ILeadReposito
                exec_name, exec_phone, exec_email,
                loan_no, claim_no, source, reg_no,
                lead_date, assigned_on, inspection_date, issued_date, tat_due, tat_pct, tat_state,
-               value, remarks, hold_remarks, report_data, created_by)
+               value, remarks, hold_remarks, created_by)
             OUTPUT INSERTED.id
             VALUES
               (@ReqId, @AssetFamily, @PropertyType, @Stage, @ReportStatus,
@@ -90,9 +100,11 @@ public sealed class LeadRepository(IDbConnectionFactory factory) : ILeadReposito
                @ExecName, @ExecPhone, @ExecEmail,
                @LoanNo, @ClaimNo, @Source, @RegNo,
                @LeadDate, @AssignedOn, @InspectionDate, @IssuedDate, @TatDue, @TatPct, @TatState,
-               @Value, @Remarks, @HoldRemarks, @ReportData, @CreatedBy);
+               @Value, @Remarks, @HoldRemarks, @CreatedBy);
             """;
-        return await conn.ExecuteScalarAsync<long>(sql, lead);
+        var id = await conn.ExecuteScalarAsync<long>(sql, lead);
+        if (lead.ReportData is not null) await UpsertReportDataAsync(conn, id, lead.ReportData);
+        return id;
     }
 
     public async Task UpdateAsync(Lead lead)
@@ -108,11 +120,48 @@ public sealed class LeadRepository(IDbConnectionFactory factory) : ILeadReposito
               loan_no=@LoanNo, claim_no=@ClaimNo, source=@Source, reg_no=@RegNo,
               lead_date=@LeadDate, assigned_on=@AssignedOn, inspection_date=@InspectionDate, issued_date=@IssuedDate,
               tat_due=@TatDue, tat_pct=@TatPct, tat_state=@TatState,
-              value=@Value, remarks=@Remarks, hold_remarks=@HoldRemarks, report_data=@ReportData,
+              value=@Value, remarks=@Remarks, hold_remarks=@HoldRemarks,
               updated_at=SYSUTCDATETIME()
             WHERE id=@Id;
             """;
         await conn.ExecuteAsync(sql, lead);
+        await UpsertReportDataAsync(conn, lead.Id, lead.ReportData);
+    }
+
+    /// <summary>
+    /// Explode the lead's report JSON into the column-per-field leadreportdata row.
+    /// Only whitelisted keys (<see cref="ReportFields"/>) are written; column names match keys.
+    /// </summary>
+    private static async Task UpsertReportDataAsync(IDbConnection conn, long leadId, string? json)
+    {
+        var values = new Dictionary<string, string?>(StringComparer.Ordinal);
+        if (!string.IsNullOrWhiteSpace(json) && JsonNode.Parse(json) is JsonObject obj)
+            foreach (var (k, v) in obj)
+                if (ReportFields.Set.Contains(k))
+                    values[k] = v?.ToString();
+
+        var p = new DynamicParameters();
+        p.Add("leadId", leadId);
+        foreach (var (k, v) in values) p.Add("p_" + k, v);
+
+        string sql;
+        if (values.Count == 0)
+        {
+            // Ensure a (possibly empty) row exists so reads are consistent.
+            sql = "IF NOT EXISTS (SELECT 1 FROM leadreportdata WHERE lead_id=@leadId) INSERT INTO leadreportdata (lead_id) VALUES (@leadId);";
+        }
+        else
+        {
+            var setList = string.Join(", ", values.Keys.Select(k => $"[{k}]=@p_{k}"));
+            var insCols = string.Join(", ", values.Keys.Select(k => $"[{k}]"));
+            var insVals = string.Join(", ", values.Keys.Select(k => $"@p_{k}"));
+            sql = $"""
+                UPDATE leadreportdata SET {setList}, updated_at=SYSUTCDATETIME() WHERE lead_id=@leadId;
+                IF @@ROWCOUNT = 0
+                    INSERT INTO leadreportdata (lead_id, {insCols}) VALUES (@leadId, {insVals});
+                """;
+        }
+        await conn.ExecuteAsync(sql, p);
     }
 
     public async Task SoftDeleteAsync(long id)

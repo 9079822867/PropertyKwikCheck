@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useLead, useUpdateLead, usePhotos, useUploadPhoto, useDeletePhoto } from "../lib/queries.js";
+import { useLead, useUpdateLead, usePhotos, useUploadPhoto, useDeletePhoto, useStatusTypes } from "../lib/queries.js";
 import { STAGES, stageFields, technicalSchema } from "../lib/wizardSchema.js";
 import { PhotoFrames } from "../lib/photoFrames.js";
 import WizardField from "../components/WizardField.jsx";
@@ -8,6 +8,19 @@ import AuthImage from "../components/AuthImage.jsx";
 import { Spinner, ErrorBox, Pill } from "../components/ui.jsx";
 
 const RATINGS = [["good", "Good"], ["fair", "Fair"], ["avg", "Average"], ["poor", "Poor"]];
+
+// The primary forward edge out of each stage — drives the "move to next stage" action.
+// Assigned/Reassigned advance to RO Confirmation; the rest follow the linear pipeline.
+const NEXT_STAGE = {
+  fresh: "assigned",
+  ro: "assigned",
+  assigned: "ro_confirmation",
+  reassigned: "ro_confirmation",
+  ro_confirmation: "qc",
+  qc: "pricing",
+  qc_hold: "qc",
+  pricing: "completed",
+};
 
 function stageKeys(stage, family) {
   if (stage === "technical") {
@@ -26,6 +39,7 @@ export default function LeadWizard() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: lead, isLoading, error } = useLead(id);
+  const { data: statusTypes } = useStatusTypes();
   const update = useUpdateLead(id);
 
   const [active, setActive] = useState(0);
@@ -40,8 +54,15 @@ export default function LeadWizard() {
   if (error) return <ErrorBox error={error} />;
 
   const family = lead.type;
-  const stage = STAGES[active];
+  // Fresh leads only capture the intake / lead-table data; the deeper report stages
+  // unlock once the lead is assigned to a valuator.
+  const visibleStages = lead.stage === "fresh" ? STAGES.slice(0, 1) : STAGES;
+  const activeIdx = Math.min(active, visibleStages.length - 1);
+  const stage = visibleStages[activeIdx];
   const onChange = (k, v) => setData((d) => ({ ...d, [k]: v }));
+
+  const nextCode = NEXT_STAGE[lead.stage];
+  const nextLabel = (statusTypes || []).find((s) => s.code === nextCode)?.label || nextCode;
 
   async function save(advance) {
     const keys = stageKeys(stage.key, family);
@@ -50,9 +71,19 @@ export default function LeadWizard() {
     try {
       await update.mutateAsync({ data: subset });
       setMsg(`Saved ${stage.label}.`);
-      if (advance && active < STAGES.length - 1) setActive(active + 1);
+      if (advance && activeIdx < visibleStages.length - 1) setActive(activeIdx + 1);
     } catch (e) {
       setMsg(e?.error || "Save failed.");
+    }
+  }
+
+  async function moveNext() {
+    if (!nextCode) return;
+    try {
+      await update.mutateAsync({ stage: nextCode });
+      setMsg(`Moved to ${nextLabel}.`);
+    } catch (e) {
+      setMsg(e?.error || "Stage change not allowed.");
     }
   }
 
@@ -68,13 +99,19 @@ export default function LeadWizard() {
       </div>
 
       {/* stepper */}
-      <div className="card card-pad" style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        {STAGES.map((s, i) => (
+      <div className="card card-pad" style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+        {visibleStages.map((s, i) => (
           <button key={s.key} onClick={() => setActive(i)}
-            className={`btn btn-sm ${i === active ? "btn-primary" : "btn-ghost"}`}>
+            className={`btn btn-sm ${i === activeIdx ? "btn-primary" : "btn-ghost"}`}>
             {i + 1}. {s.label}
           </button>
         ))}
+        {nextCode && (
+          <button className="btn btn-sm btn-soft" style={{ marginLeft: "auto" }}
+            disabled={update.isPending} onClick={moveNext} title={`Move this lead to ${nextLabel}`}>
+            Move to next stage → {nextLabel}
+          </button>
+        )}
       </div>
 
       {msg && <div className="error-banner" style={{ background: "var(--good-bg)", color: "var(--good)" }}>{msg}</div>}

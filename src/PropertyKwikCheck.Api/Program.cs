@@ -117,7 +117,12 @@ builder.Services.AddCors(o => o.AddPolicy("frontend", p => p
 
 // ---- Swagger ----------------------------------------------------------------
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Surface XML doc comments (endpoint summaries + parameter descriptions) in Swagger.
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml");
+    if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+});
 
 var app = builder.Build();
 

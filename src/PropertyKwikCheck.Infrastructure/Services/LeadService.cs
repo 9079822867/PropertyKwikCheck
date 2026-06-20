@@ -216,6 +216,7 @@ public sealed class LeadService(
             var merged = JsonMerge.Merge(LeadMapper.ParseData(lead.ReportData), request.Data);
             lead.ReportData = merged.ToJsonString();
             SyncValueFromData(lead, merged, request.Value);
+            SyncColumnsFromData(lead, merged);
         }
         else if (request.Value is not null)
         {
@@ -309,6 +310,28 @@ public sealed class LeadService(
         if (explicitValue is not null) { lead.Value = explicitValue; return; }
         var fmv = Long(data, "fairMarketValue") ?? Long(data, "adoptedValue");
         if (fmv is not null) lead.Value = fmv;
+    }
+
+    /// <summary>
+    /// Keep the leads-table convenience columns aligned with the report payload when intake
+    /// fields are edited (spec §8.3). Assignment-owned columns (valuator / RO company) are
+    /// left to the assign flow. Only overwrites a column when its key is present in the data.
+    /// </summary>
+    private static void SyncColumnsFromData(Lead lead, JsonObject d)
+    {
+        lead.Applicant = Str(d, "applicant") ?? lead.Applicant;
+        lead.CoApplicant = Str(d, "coApplicant") ?? lead.CoApplicant;
+        lead.Contact = Str(d, "contact") ?? lead.Contact;
+        lead.LenderName = Str(d, "lender") ?? lead.LenderName;
+        lead.Branch = Str(d, "branch") ?? lead.Branch;
+        lead.LoanNo = Str(d, "loanNo") ?? lead.LoanNo;
+        lead.ClaimNo = Str(d, "claimNo") ?? lead.ClaimNo;
+        lead.Source = Str(d, "source") ?? lead.Source;
+        lead.ExecName = Str(d, "execName") ?? lead.ExecName;
+        lead.ExecPhone = Str(d, "execPhone") ?? lead.ExecPhone;
+        lead.ExecEmail = Str(d, "execEmail") ?? lead.ExecEmail;
+        var leadDate = Date(d, "leadDate");
+        if (leadDate is not null) lead.LeadDate = leadDate;
     }
 
     private LeadDto ToScopedDto(Lead lead)

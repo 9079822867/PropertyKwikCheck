@@ -209,40 +209,142 @@ SET IDENTITY_INSERT dbo.leads ON;
 IF NOT EXISTS (SELECT 1 FROM dbo.leads WHERE id = 4812)
 INSERT INTO dbo.leads (id, req_id, asset_family, property_type, stage, report_status, applicant, pin, location,
     lender_company_id, lender_name, branch, valuator_user_id, valuator_name, ro_company, exec_name, exec_phone, exec_email,
-    loan_no, source, lead_date, assigned_on, tat_due, tat_pct, tat_state, value, remarks, report_data)
+    loan_no, source, lead_date, assigned_on, tat_due, tat_pct, tat_state, value, remarks)
 VALUES (4812, '4WRP04812', 'property', 'Residential', 'qc', 'In QC Review', 'Mr. Ankit Sharma', '400077', 'Andheri East, Mumbai',
     @hdfcId, 'HDFC Bank Ltd', 'Andheri East, Mumbai', @rahul, 'Rahul Mehta', 'Kwik Check Pvt Ltd', 'Meena Patil', '99220 14785', 'meena.p@kwikcheck.in',
-    'HOU52030011', 'Bank Portal', '2026-05-12', '2026-05-18', '2026-05-25', 88, 'warn', 21540000, 'Docs pending from branch',
-    N'{"reportType":"Property Inspection","reportStatus":"In QC Review","leadId":"4WRP04812","reqId":"4WRP04812","propertyType":"Residential","applicant":"Mr. Ankit Sharma","lender":"HDFC Bank Ltd","branch":"Andheri East, Mumbai","loanNo":"HOU52030011","addrDoc":"Flat 1203, Sunrise Heights, Andheri East, Mumbai 400077","config":"3BHK","carpet":"980","builtup":"1180","superBuiltup":"1350","yearBuilt":"2016","facing":"E","floorNo":"12","totalFloors":"22","ownership":"Freehold","scInterior":"9.0","scExterior":"7.5","scStructure":"8.5","scFlooring":"8.0","fairMarketValue":"21540000","adoptedValue":"21540000","realizablePct":"90","realizableValue":"19386000","distressPct":"75","distressValue":"16155000","inspectedBy":"Rahul Mehta","inspectedLicence":"KC-CPV-0473","reviewedBy":"Neha Joshi"}');
+    'HOU52030011', 'Bank Portal', '2026-05-12', '2026-05-18', '2026-05-25', 88, 'warn', 21540000, 'Docs pending from branch');
 
 IF NOT EXISTS (SELECT 1 FROM dbo.leads WHERE id = 4913)
 INSERT INTO dbo.leads (id, req_id, asset_family, property_type, stage, report_status, applicant, pin, location,
     lender_company_id, lender_name, branch, valuator_user_id, valuator_name, ro_company, exec_name, exec_phone, exec_email,
-    loan_no, source, lead_date, assigned_on, tat_due, tat_pct, tat_state, value, remarks, report_data)
+    loan_no, source, lead_date, assigned_on, tat_due, tat_pct, tat_state, value, remarks)
 VALUES (4913, '4WPL04913', 'plot', 'Plot', 'assigned', 'Assigned to Valuer', 'Mr. Rajesh Kumar Sharma', '302029', 'Bagru, Jaipur',
     @hdfcId, 'HDFC Bank Ltd', 'Bagru, Jaipur', @ajayv, 'Ajay Malviya', 'Kwik Check Pvt Ltd', 'Brijesh Prajapati', '98704 58149', 'brijesh.p@kwikcheck.in',
-    'LAP77120034', 'DSA Referral', '2026-05-14', '2026-05-18', '2026-05-26', 40, 'ok', 2400000, 'Awaiting appointment',
-    N'{"reportType":"Plot Valuation","reportStatus":"Assigned to Valuer","leadId":"4WPL04913","reqId":"4WPL04913","propertyType":"Plot","applicant":"Mr. Rajesh Kumar Sharma","lender":"HDFC Bank Ltd","branch":"Bagru, Jaipur","loanNo":"LAP77120034","plotNumber":"B-114","surveyKhasra":"245/2","villageColony":"Shanti Vihar","tehsil":"Bagru","districtState":"Jaipur, Rajasthan","ownerName":"Rajesh Kumar Sharma","ownershipType":"Freehold","scAccessibility":"7.0","scMarketability":"6.5","scDevelopment":"6.0","scLiquidity":"6.5","fairMarketValue":"2400000","adoptedValue":"2400000","realizablePct":"90","realizableValue":"2160000","distressPct":"75","distressValue":"1800000"}');
+    'LAP77120034', 'DSA Referral', '2026-05-14', '2026-05-18', '2026-05-26', 40, 'ok', 2400000, 'Awaiting appointment');
 
 IF NOT EXISTS (SELECT 1 FROM dbo.leads WHERE id = 4927)
 INSERT INTO dbo.leads (id, req_id, asset_family, property_type, stage, report_status, applicant, pin, location,
     lender_company_id, lender_name, branch, valuator_user_id, valuator_name, ro_company, exec_name, exec_phone, exec_email,
-    loan_no, source, lead_date, assigned_on, tat_due, tat_pct, tat_state, value, remarks, report_data)
+    loan_no, source, lead_date, assigned_on, tat_due, tat_pct, tat_state, value, remarks)
 VALUES (4927, '4WAG04927', 'agri', 'Agricultural Land', 'ro_confirmation', 'Awaiting RO Confirmation', 'Mr. Mohan Lal Jat', '302029', 'Bassi, Jaipur',
     @hdfcId, 'HDFC Bank Ltd', 'Bassi, Jaipur', @rahul, 'Rahul Mehta', 'Kwik Check Pvt Ltd', 'Brijesh Prajapati', '98704 58149', 'brijesh.p@kwikcheck.in',
-    'AGRI4480021', 'Bank Portal', '2026-05-13', '2026-05-17', '2026-05-27', 55, 'ok', 2000000, 'Site visit done — drafting',
-    N'{"reportType":"Agri Land Valuation","reportStatus":"Awaiting RO Confirmation","leadId":"4WAG04927","reqId":"4WAG04927","propertyType":"Agricultural Land","applicant":"Mr. Mohan Lal Jat","lender":"HDFC Bank Ltd","branch":"Bassi, Jaipur","loanNo":"AGRI4480021","khasraNumber":"512","khataNumber":"77","village":"Bassi","tehsil":"Bassi","districtState":"Jaipur, Rajasthan","jamabandiYear":"2024-25","khatedarName":"Mohan Lal Jat","tenureType":"Khatedari — agricultural","scSoil":"7.5","scIrrigation":"7.0","scAccessibility":"6.5","scLiquidity":"6.0","fairMarketValue":"2000000","adoptedValue":"2000000","realizablePct":"90","realizableValue":"1800000","distressPct":"75","distressValue":"1500000"}');
+    'AGRI4480021', 'Bank Portal', '2026-05-13', '2026-05-17', '2026-05-27', 55, 'ok', 2000000, 'Site visit done — drafting');
 
 IF NOT EXISTS (SELECT 1 FROM dbo.leads WHERE id = 4790)
 INSERT INTO dbo.leads (id, req_id, asset_family, property_type, stage, report_status, applicant, pin, location,
     lender_company_id, lender_name, branch, valuator_user_id, valuator_name, ro_company, exec_name, exec_phone, exec_email,
-    loan_no, source, lead_date, assigned_on, inspection_date, issued_date, tat_due, tat_pct, tat_state, value, remarks, report_data)
+    loan_no, source, lead_date, assigned_on, inspection_date, issued_date, tat_due, tat_pct, tat_state, value, remarks)
 VALUES (4790, '4WRP04790', 'property', 'Residential', 'completed', 'Verified & Issued', 'Mrs. Sunita Verma', '411001', 'Kothrud, Pune',
     @iciciId, 'ICICI Bank Ltd', 'Kothrud, Pune', @rahul, 'Rahul Mehta', 'Kwik Check Pvt Ltd', 'Arjun Rao', '98330 71246', 'arjun.r@kwikcheck.in',
-    'HOU61220098', 'Bank Portal', '2026-05-02', '2026-05-06', '2026-05-08', '2026-05-20', '2026-05-13', 100, 'ok', 9850000, 'Site visit done — drafting',
-    N'{"reportType":"Property Inspection","reportStatus":"Verified & Issued","leadId":"4WRP04790","reqId":"4WRP04790","propertyType":"Residential","applicant":"Mrs. Sunita Verma","lender":"ICICI Bank Ltd","branch":"Kothrud, Pune","loanNo":"HOU61220098","config":"2BHK","carpet":"720","builtup":"860","superBuiltup":"980","yearBuilt":"2012","facing":"N","floorNo":"5","totalFloors":"11","ownership":"Freehold","scInterior":"8.0","scExterior":"7.0","scStructure":"8.0","scFlooring":"7.5","fairMarketValue":"9850000","adoptedValue":"9850000","realizablePct":"90","realizableValue":"8865000","distressPct":"75","distressValue":"7387500","inspectedBy":"Rahul Mehta","inspectedLicence":"KC-CPV-0473","reviewedBy":"Neha Joshi","authorisedBy":"Suresh Rao","authorisedDate":"2026-05-20"}');
+    'HOU61220098', 'Bank Portal', '2026-05-02', '2026-05-06', '2026-05-08', '2026-05-20', '2026-05-13', 100, 'ok', 9850000, 'Site visit done — drafting');
 
 SET IDENTITY_INSERT dbo.leads OFF;
+
+/* hero leads' report payloads — exploded column-wise into leadreportdata. */
+;WITH src(id, j) AS (
+    SELECT 4812, N'{"reportType":"Property Inspection","reportStatus":"In QC Review","leadId":"4WRP04812","reqId":"4WRP04812","propertyType":"Residential","applicant":"Mr. Ankit Sharma","lender":"HDFC Bank Ltd","branch":"Andheri East, Mumbai","loanNo":"HOU52030011","addrDoc":"Flat 1203, Sunrise Heights, Andheri East, Mumbai 400077","config":"3BHK","carpet":"980","builtup":"1180","superBuiltup":"1350","yearBuilt":"2016","facing":"E","floorNo":"12","totalFloors":"22","ownership":"Freehold","scInterior":"9.0","scExterior":"7.5","scStructure":"8.5","scFlooring":"8.0","fairMarketValue":"21540000","adoptedValue":"21540000","realizablePct":"90","realizableValue":"19386000","distressPct":"75","distressValue":"16155000","inspectedBy":"Rahul Mehta","inspectedLicence":"KC-CPV-0473","reviewedBy":"Neha Joshi"}' UNION ALL
+    SELECT 4913, N'{"reportType":"Plot Valuation","reportStatus":"Assigned to Valuer","leadId":"4WPL04913","reqId":"4WPL04913","propertyType":"Plot","applicant":"Mr. Rajesh Kumar Sharma","lender":"HDFC Bank Ltd","branch":"Bagru, Jaipur","loanNo":"LAP77120034","plotNumber":"B-114","surveyKhasra":"245/2","villageColony":"Shanti Vihar","tehsil":"Bagru","districtState":"Jaipur, Rajasthan","ownerName":"Rajesh Kumar Sharma","ownershipType":"Freehold","scAccessibility":"7.0","scMarketability":"6.5","scDevelopment":"6.0","scLiquidity":"6.5","fairMarketValue":"2400000","adoptedValue":"2400000","realizablePct":"90","realizableValue":"2160000","distressPct":"75","distressValue":"1800000"}' UNION ALL
+    SELECT 4927, N'{"reportType":"Agri Land Valuation","reportStatus":"Awaiting RO Confirmation","leadId":"4WAG04927","reqId":"4WAG04927","propertyType":"Agricultural Land","applicant":"Mr. Mohan Lal Jat","lender":"HDFC Bank Ltd","branch":"Bassi, Jaipur","loanNo":"AGRI4480021","khasraNumber":"512","khataNumber":"77","village":"Bassi","tehsil":"Bassi","districtState":"Jaipur, Rajasthan","jamabandiYear":"2024-25","khatedarName":"Mohan Lal Jat","tenureType":"Khatedari — agricultural","scSoil":"7.5","scIrrigation":"7.0","scAccessibility":"6.5","scLiquidity":"6.0","fairMarketValue":"2000000","adoptedValue":"2000000","realizablePct":"90","realizableValue":"1800000","distressPct":"75","distressValue":"1500000"}' UNION ALL
+    SELECT 4790, N'{"reportType":"Property Inspection","reportStatus":"Verified & Issued","leadId":"4WRP04790","reqId":"4WRP04790","propertyType":"Residential","applicant":"Mrs. Sunita Verma","lender":"ICICI Bank Ltd","branch":"Kothrud, Pune","loanNo":"HOU61220098","config":"2BHK","carpet":"720","builtup":"860","superBuiltup":"980","yearBuilt":"2012","facing":"N","floorNo":"5","totalFloors":"11","ownership":"Freehold","scInterior":"8.0","scExterior":"7.0","scStructure":"8.0","scFlooring":"7.5","fairMarketValue":"9850000","adoptedValue":"9850000","realizablePct":"90","realizableValue":"8865000","distressPct":"75","distressValue":"7387500","inspectedBy":"Rahul Mehta","inspectedLicence":"KC-CPV-0473","reviewedBy":"Neha Joshi","authorisedBy":"Suresh Rao","authorisedDate":"2026-05-20"}'
+)
+INSERT INTO dbo.leadreportdata (lead_id,
+    [addrActual], [addrDoc], [adjustment], [adoptedRate], [adoptedValue], [agriMarketability], [agriMarketability_r], [applicant],
+    [approachAccess], [areaForVal], [assignedRO], [authorisedBy], [authorisedDate], [avgRate], [balcony], [bathFloor],
+    [bathrooms], [bedFloor], [bedrooms], [borewellPower], [branch], [builtup], [canalSupport], [carpet],
+    [ceiling], [civicServices], [civicServices_r], [claimNo], [cmp1Rate], [cmp2Rate], [cmp3Rate], [coApplicant],
+    [conditionKey], [config], [connectivity], [contact], [cornerAdv], [croppingPattern], [croppingPattern_r], [currentStatus],
+    [demand], [devActivity], [dimE], [dimN], [dimS], [dimTotal], [dimW], [disclaimer],
+    [disputeRelated], [distBranch], [distHighway], [distHospital], [distMainRoad], [distMandi], [distMarket], [distMetalledRoad],
+    [distSchool], [distVillageAbadi], [distressObs], [distressPct], [distressValue], [districtState], [dlcAdjust], [dlcArea],
+    [dlcBasis], [dlcRate], [dlcUsedFor], [dlcValue], [docType], [docsRelied], [docsShown], [electrical],
+    [encumbrance], [execEmail], [execName], [execPhone], [facade], [facing], [fairMarketValue], [floorNo],
+    [foundation], [frontageDepth], [gps], [htLine], [incomeDependence], [inspectedBy], [inspectedDate], [inspectedLicence],
+    [inspectionDate], [intWalls], [interiorLocation], [irrigation], [irrigation_r], [issuedDate], [jamabandiMap], [jamabandiYear],
+    [khasraGirdawari], [khasraNumber], [khataNumber], [khatedarName], [kitchen], [kitchenFloor], [landArea], [landCeiling],
+    [landUse], [landUseRestriction], [landUse_r], [landmark], [layoutPlan], [leadDate], [leadId], [lender],
+    [liquidityObs], [livingFloor], [livingHall], [loanNo], [loanType], [lobby], [localityClass], [localityEnquiry],
+    [localityStatus], [localityStatus_r], [locationRemark], [marketability], [marketability_r], [masterBed], [mutationEntry], [mutationEntryT],
+    [mutationStatus], [nearestTown], [overallRisk], [ownerName], [ownership], [ownershipType], [paperCheck], [personMet],
+    [plotArea], [plotNumber], [powerConnection], [powerConnection_r], [propertyType], [rccFrame], [realizablePct], [realizableValue],
+    [redevelopment], [regNumber], [regOffice], [relationship], [remarks], [reportStatus], [reportType], [reqId],
+    [restrictedBuyer], [revenueOffice], [reviewedBy], [reviewedDate], [reviewedLicence], [roCompany], [roadType], [roadWidth],
+    [saleDeedCopy], [saleDeedDate], [scAccessibility], [scDevelopment], [scExterior], [scFlooring], [scInterior], [scIrrigation],
+    [scLiquidity], [scMarketability], [scSoil], [scStructure], [scopeLimit], [soilFertility], [soilType], [soilType_r],
+    [source], [structuralCondition], [superBuiltup], [surrDevelopment], [surrDevelopment_r], [surveyKhasra], [tatDue], [taxReceipt],
+    [tehsil], [tenureType], [terrace], [topoDrainage], [topography], [totalFloors], [vBoundary], [vBunds],
+    [vCultivation], [vEncroach], [vIdentified], [vLocated], [vPossession], [vVacant], [valStatement], [valuationPurpose],
+    [village], [villageColony], [yearBuilt])
+SELECT s.id,
+        JSON_VALUE(s.j, '$.addrActual'), JSON_VALUE(s.j, '$.addrDoc'), JSON_VALUE(s.j, '$.adjustment'),
+        JSON_VALUE(s.j, '$.adoptedRate'), JSON_VALUE(s.j, '$.adoptedValue'), JSON_VALUE(s.j, '$.agriMarketability'),
+        JSON_VALUE(s.j, '$.agriMarketability_r'), JSON_VALUE(s.j, '$.applicant'), JSON_VALUE(s.j, '$.approachAccess'),
+        JSON_VALUE(s.j, '$.areaForVal'), JSON_VALUE(s.j, '$.assignedRO'), JSON_VALUE(s.j, '$.authorisedBy'),
+        JSON_VALUE(s.j, '$.authorisedDate'), JSON_VALUE(s.j, '$.avgRate'), JSON_VALUE(s.j, '$.balcony'),
+        JSON_VALUE(s.j, '$.bathFloor'), JSON_VALUE(s.j, '$.bathrooms'), JSON_VALUE(s.j, '$.bedFloor'),
+        JSON_VALUE(s.j, '$.bedrooms'), JSON_VALUE(s.j, '$.borewellPower'), JSON_VALUE(s.j, '$.branch'),
+        JSON_VALUE(s.j, '$.builtup'), JSON_VALUE(s.j, '$.canalSupport'), JSON_VALUE(s.j, '$.carpet'),
+        JSON_VALUE(s.j, '$.ceiling'), JSON_VALUE(s.j, '$.civicServices'), JSON_VALUE(s.j, '$.civicServices_r'),
+        JSON_VALUE(s.j, '$.claimNo'), JSON_VALUE(s.j, '$.cmp1Rate'), JSON_VALUE(s.j, '$.cmp2Rate'),
+        JSON_VALUE(s.j, '$.cmp3Rate'), JSON_VALUE(s.j, '$.coApplicant'), JSON_VALUE(s.j, '$.conditionKey'),
+        JSON_VALUE(s.j, '$.config'), JSON_VALUE(s.j, '$.connectivity'), JSON_VALUE(s.j, '$.contact'),
+        JSON_VALUE(s.j, '$.cornerAdv'), JSON_VALUE(s.j, '$.croppingPattern'), JSON_VALUE(s.j, '$.croppingPattern_r'),
+        JSON_VALUE(s.j, '$.currentStatus'), JSON_VALUE(s.j, '$.demand'), JSON_VALUE(s.j, '$.devActivity'),
+        JSON_VALUE(s.j, '$.dimE'), JSON_VALUE(s.j, '$.dimN'), JSON_VALUE(s.j, '$.dimS'),
+        JSON_VALUE(s.j, '$.dimTotal'), JSON_VALUE(s.j, '$.dimW'), JSON_VALUE(s.j, '$.disclaimer'),
+        JSON_VALUE(s.j, '$.disputeRelated'), JSON_VALUE(s.j, '$.distBranch'), JSON_VALUE(s.j, '$.distHighway'),
+        JSON_VALUE(s.j, '$.distHospital'), JSON_VALUE(s.j, '$.distMainRoad'), JSON_VALUE(s.j, '$.distMandi'),
+        JSON_VALUE(s.j, '$.distMarket'), JSON_VALUE(s.j, '$.distMetalledRoad'), JSON_VALUE(s.j, '$.distSchool'),
+        JSON_VALUE(s.j, '$.distVillageAbadi'), JSON_VALUE(s.j, '$.distressObs'), JSON_VALUE(s.j, '$.distressPct'),
+        JSON_VALUE(s.j, '$.distressValue'), JSON_VALUE(s.j, '$.districtState'), JSON_VALUE(s.j, '$.dlcAdjust'),
+        JSON_VALUE(s.j, '$.dlcArea'), JSON_VALUE(s.j, '$.dlcBasis'), JSON_VALUE(s.j, '$.dlcRate'),
+        JSON_VALUE(s.j, '$.dlcUsedFor'), JSON_VALUE(s.j, '$.dlcValue'), JSON_VALUE(s.j, '$.docType'),
+        JSON_VALUE(s.j, '$.docsRelied'), JSON_VALUE(s.j, '$.docsShown'), JSON_VALUE(s.j, '$.electrical'),
+        JSON_VALUE(s.j, '$.encumbrance'), JSON_VALUE(s.j, '$.execEmail'), JSON_VALUE(s.j, '$.execName'),
+        JSON_VALUE(s.j, '$.execPhone'), JSON_VALUE(s.j, '$.facade'), JSON_VALUE(s.j, '$.facing'),
+        JSON_VALUE(s.j, '$.fairMarketValue'), JSON_VALUE(s.j, '$.floorNo'), JSON_VALUE(s.j, '$.foundation'),
+        JSON_VALUE(s.j, '$.frontageDepth'), JSON_VALUE(s.j, '$.gps'), JSON_VALUE(s.j, '$.htLine'),
+        JSON_VALUE(s.j, '$.incomeDependence'), JSON_VALUE(s.j, '$.inspectedBy'), JSON_VALUE(s.j, '$.inspectedDate'),
+        JSON_VALUE(s.j, '$.inspectedLicence'), JSON_VALUE(s.j, '$.inspectionDate'), JSON_VALUE(s.j, '$.intWalls'),
+        JSON_VALUE(s.j, '$.interiorLocation'), JSON_VALUE(s.j, '$.irrigation'), JSON_VALUE(s.j, '$.irrigation_r'),
+        JSON_VALUE(s.j, '$.issuedDate'), JSON_VALUE(s.j, '$.jamabandiMap'), JSON_VALUE(s.j, '$.jamabandiYear'),
+        JSON_VALUE(s.j, '$.khasraGirdawari'), JSON_VALUE(s.j, '$.khasraNumber'), JSON_VALUE(s.j, '$.khataNumber'),
+        JSON_VALUE(s.j, '$.khatedarName'), JSON_VALUE(s.j, '$.kitchen'), JSON_VALUE(s.j, '$.kitchenFloor'),
+        JSON_VALUE(s.j, '$.landArea'), JSON_VALUE(s.j, '$.landCeiling'), JSON_VALUE(s.j, '$.landUse'),
+        JSON_VALUE(s.j, '$.landUseRestriction'), JSON_VALUE(s.j, '$.landUse_r'), JSON_VALUE(s.j, '$.landmark'),
+        JSON_VALUE(s.j, '$.layoutPlan'), JSON_VALUE(s.j, '$.leadDate'), JSON_VALUE(s.j, '$.leadId'),
+        JSON_VALUE(s.j, '$.lender'), JSON_VALUE(s.j, '$.liquidityObs'), JSON_VALUE(s.j, '$.livingFloor'),
+        JSON_VALUE(s.j, '$.livingHall'), JSON_VALUE(s.j, '$.loanNo'), JSON_VALUE(s.j, '$.loanType'),
+        JSON_VALUE(s.j, '$.lobby'), JSON_VALUE(s.j, '$.localityClass'), JSON_VALUE(s.j, '$.localityEnquiry'),
+        JSON_VALUE(s.j, '$.localityStatus'), JSON_VALUE(s.j, '$.localityStatus_r'), JSON_VALUE(s.j, '$.locationRemark'),
+        JSON_VALUE(s.j, '$.marketability'), JSON_VALUE(s.j, '$.marketability_r'), JSON_VALUE(s.j, '$.masterBed'),
+        JSON_VALUE(s.j, '$.mutationEntry'), JSON_VALUE(s.j, '$.mutationEntryT'), JSON_VALUE(s.j, '$.mutationStatus'),
+        JSON_VALUE(s.j, '$.nearestTown'), JSON_VALUE(s.j, '$.overallRisk'), JSON_VALUE(s.j, '$.ownerName'),
+        JSON_VALUE(s.j, '$.ownership'), JSON_VALUE(s.j, '$.ownershipType'), JSON_VALUE(s.j, '$.paperCheck'),
+        JSON_VALUE(s.j, '$.personMet'), JSON_VALUE(s.j, '$.plotArea'), JSON_VALUE(s.j, '$.plotNumber'),
+        JSON_VALUE(s.j, '$.powerConnection'), JSON_VALUE(s.j, '$.powerConnection_r'), JSON_VALUE(s.j, '$.propertyType'),
+        JSON_VALUE(s.j, '$.rccFrame'), JSON_VALUE(s.j, '$.realizablePct'), JSON_VALUE(s.j, '$.realizableValue'),
+        JSON_VALUE(s.j, '$.redevelopment'), JSON_VALUE(s.j, '$.regNumber'), JSON_VALUE(s.j, '$.regOffice'),
+        JSON_VALUE(s.j, '$.relationship'), JSON_VALUE(s.j, '$.remarks'), JSON_VALUE(s.j, '$.reportStatus'),
+        JSON_VALUE(s.j, '$.reportType'), JSON_VALUE(s.j, '$.reqId'), JSON_VALUE(s.j, '$.restrictedBuyer'),
+        JSON_VALUE(s.j, '$.revenueOffice'), JSON_VALUE(s.j, '$.reviewedBy'), JSON_VALUE(s.j, '$.reviewedDate'),
+        JSON_VALUE(s.j, '$.reviewedLicence'), JSON_VALUE(s.j, '$.roCompany'), JSON_VALUE(s.j, '$.roadType'),
+        JSON_VALUE(s.j, '$.roadWidth'), JSON_VALUE(s.j, '$.saleDeedCopy'), JSON_VALUE(s.j, '$.saleDeedDate'),
+        JSON_VALUE(s.j, '$.scAccessibility'), JSON_VALUE(s.j, '$.scDevelopment'), JSON_VALUE(s.j, '$.scExterior'),
+        JSON_VALUE(s.j, '$.scFlooring'), JSON_VALUE(s.j, '$.scInterior'), JSON_VALUE(s.j, '$.scIrrigation'),
+        JSON_VALUE(s.j, '$.scLiquidity'), JSON_VALUE(s.j, '$.scMarketability'), JSON_VALUE(s.j, '$.scSoil'),
+        JSON_VALUE(s.j, '$.scStructure'), JSON_VALUE(s.j, '$.scopeLimit'), JSON_VALUE(s.j, '$.soilFertility'),
+        JSON_VALUE(s.j, '$.soilType'), JSON_VALUE(s.j, '$.soilType_r'), JSON_VALUE(s.j, '$.source'),
+        JSON_VALUE(s.j, '$.structuralCondition'), JSON_VALUE(s.j, '$.superBuiltup'), JSON_VALUE(s.j, '$.surrDevelopment'),
+        JSON_VALUE(s.j, '$.surrDevelopment_r'), JSON_VALUE(s.j, '$.surveyKhasra'), JSON_VALUE(s.j, '$.tatDue'),
+        JSON_VALUE(s.j, '$.taxReceipt'), JSON_VALUE(s.j, '$.tehsil'), JSON_VALUE(s.j, '$.tenureType'),
+        JSON_VALUE(s.j, '$.terrace'), JSON_VALUE(s.j, '$.topoDrainage'), JSON_VALUE(s.j, '$.topography'),
+        JSON_VALUE(s.j, '$.totalFloors'), JSON_VALUE(s.j, '$.vBoundary'), JSON_VALUE(s.j, '$.vBunds'),
+        JSON_VALUE(s.j, '$.vCultivation'), JSON_VALUE(s.j, '$.vEncroach'), JSON_VALUE(s.j, '$.vIdentified'),
+        JSON_VALUE(s.j, '$.vLocated'), JSON_VALUE(s.j, '$.vPossession'), JSON_VALUE(s.j, '$.vVacant'),
+        JSON_VALUE(s.j, '$.valStatement'), JSON_VALUE(s.j, '$.valuationPurpose'), JSON_VALUE(s.j, '$.village'),
+        JSON_VALUE(s.j, '$.villageColony'), JSON_VALUE(s.j, '$.yearBuilt')
+FROM src s
+WHERE NOT EXISTS (SELECT 1 FROM dbo.leadreportdata r WHERE r.lead_id = s.id);
 
 /* ---------- site visits (yard schedule) ---------- */
 IF NOT EXISTS (SELECT 1 FROM dbo.site_visits)
