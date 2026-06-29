@@ -45,15 +45,14 @@ export default function WizardField({ field, data, onChange }) {
       </div>
     );
   } else if (t === "textrate") {
+    // Parameter assessment is rating-only — the free-text "valuer observation" input
+    // was removed per client feedback (R50). Rating is stored under `${k}_r`.
     const rk = `${k}_r`;
     control = (
-      <div style={{ display: "flex", gap: 6 }}>
-        <input value={val} onChange={(e) => set(e.target.value)} style={{ ...inputStyle, flex: 1 }} />
-        <select value={data[rk] ?? ""} onChange={(e) => onChange(rk, e.target.value)} style={{ ...inputStyle, width: 120 }}>
-          <option value="">rate</option>
-          {RATINGS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-      </div>
+      <select value={data[rk] ?? ""} onChange={(e) => onChange(rk, e.target.value)} style={inputStyle}>
+        <option value="">— rate —</option>
+        {RATINGS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+      </select>
     );
   } else {
     const type = t === "date" ? "date" : t === "num" || t === "rupee" ? "number" : "text";

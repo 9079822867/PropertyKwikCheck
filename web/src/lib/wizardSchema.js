@@ -5,7 +5,7 @@ import { PhotoFrames } from "./photoFrames.js";
 
 export const STAGES = [
   { key: "intake", label: "Intake" },
-  { key: "site", label: "Site & Records" },
+  { key: "site", label: "Records & Site" },
   { key: "technical", label: "Technical & Risk" },
   { key: "valuation", label: "Valuation & Sign-off" },
   { key: "photos", label: "Photos & Evidence" },
@@ -74,6 +74,10 @@ const SITE = {
     f("vLocated", "Located", "seg"), f("vIdentified", "Identified", "seg"), f("vVacant", "Vacant", "seg"),
     f("vEncroach", "Encroachment", "seg"), f("vBoundary", "Boundary", "segp"),
     f("vPossession", "Possession", "sel", ["Available", "With Owner", "Disputed", "Not available"]),
+    // Plot dimensions (R47 — "Plot Dimension is Missing"): per-side measurements + total area.
+    f("plotDimN", "Dimension North (ft)", "num"), f("plotDimS", "Dimension South (ft)", "num"),
+    f("plotDimE", "Dimension East (ft)", "num"), f("plotDimW", "Dimension West (ft)", "num"),
+    f("plotDimTotal", "Total Plot Area (sq.ft)", "num"),
     f("plotNumber", "Plot Number"), f("surveyKhasra", "Survey / Khasra"), f("villageColony", "Village / Colony"),
     f("tehsil", "Tehsil"), f("districtState", "District / State"), f("gps", "GPS"),
     f("ownerName", "Owner Name"),
@@ -215,12 +219,12 @@ export function createIntakeSections(assetType) {
     {
       t: "Case Registration", s: "Core identifiers for this valuation request", c: 3, f: [
         fx("reportType", "Report Type", "sel", { opt: REPORT_TYPES }),
-        fx("propertyType", "Property / Asset Type"),
+        // Property / Asset Type is a dropdown (R6); Report/Lead No. and Lead Date are
+        // system-generated and hidden from lead creation (R2, R5).
+        fx("propertyType", "Property / Asset Type", "sel", { opt: Object.keys(ASSET_META) }),
         fx("loanNo", "Loan / Prospect No."),
-        fx("leadId", "Report / Lead No.", "text", { ph: `${m.prefix}-2026-#####` }),
         fx("reqId", "Request ID"),
         fx("claimNo", "Bank Claim / Ref No."),
-        fx("leadDate", "Lead Date", "date"),
         fx("source", "Source", "sel", { opt: SOURCES }),
         fx("valuationPurpose", "Valuation Purpose", "sel", { opt: PURPOSE[assetType] || PURPOSE.Residential }),
         fx("loanType", "Loan Type", "sel", { opt: LOAN_TYPE[assetType] || LOAN_TYPE.Residential }),

@@ -54,9 +54,10 @@ export default function LeadWizard() {
   if (error) return <ErrorBox error={error} />;
 
   const family = lead.type;
-  // Fresh leads only capture the intake / lead-table data; the deeper report stages
-  // unlock once the lead is assigned to a valuator.
-  const visibleStages = lead.stage === "fresh" ? STAGES.slice(0, 1) : STAGES;
+  // Fresh leads only edit the intake / lead-request details — not the report fields (R13).
+  // Once assigned, Edit Lead jumps straight into the report stages (Records & Site →
+  // Technical & Risk → Valuation & Sign-off → Photos & Evidence) and hides Intake (R45).
+  const visibleStages = lead.stage === "fresh" ? STAGES.slice(0, 1) : STAGES.slice(1);
   const activeIdx = Math.min(active, visibleStages.length - 1);
   const stage = visibleStages[activeIdx];
   const onChange = (k, v) => setData((d) => ({ ...d, [k]: v }));

@@ -91,6 +91,25 @@ const STAGE_COLS = {
 };
 const colsFor = (b) => STAGE_COLS[b] || STAGE_COLS._default;
 
+// Per-stage row-action visibility (client QA feedback — "kcpv working.xlsx").
+// Note / Edit / Reject stay available on every live lead; Delete is removed everywhere;
+// Download only on completed; View and Assign/Reassign are stage-scoped:
+//   fresh / assigned / reassigned → Assign|Reassign, no View, no Download, no Delete
+//   ro_confirmation / qc / qc_hold / pricing → no Reassign, View only, no Download/Delete
+const ACTION_POLICY = {
+  fresh:           { assign: true,  view: false, download: false, del: false },
+  ro:              { assign: true,  view: false, download: false, del: false },
+  assigned:        { assign: true,  view: false, download: false, del: false },
+  reassigned:      { assign: true,  view: false, download: false, del: false },
+  ro_confirmation: { assign: false, view: true,  download: false, del: false },
+  qc:              { assign: false, view: true,  download: false, del: false },
+  qc_hold:         { assign: false, view: true,  download: false, del: false },
+  pricing:         { assign: false, view: true,  download: false, del: false },
+  completed:       { assign: false, view: true,  download: true,  del: false },
+  _default:        { assign: true,  view: true,  download: false, del: false },
+};
+const actionsFor = (stage) => ACTION_POLICY[stage] || ACTION_POLICY._default;
+
 export default function Leads() {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
@@ -151,18 +170,20 @@ export default function Leads() {
                     <tr><td colSpan={cols.length + 1}><div className="empty-state"><Icon name="buckets" size={38} /><h3>No leads in this bucket</h3><div>Leads will appear here as they reach the “{meta?.label}” stage.</div></div></td></tr>
                   ) : data.rows.map((l) => {
                     const done = l.stage === "completed", terminal = done || l.stage === "rejected";
+                    const pol = actionsFor(l.stage);
+                    const isReassign = ["assigned", "reassigned"].includes(l.stage);
                     return (
                       <tr key={l.id} style={{ cursor: "default" }}>
                         {cols.map((k) => COLDEF[k][1](l))}
                         <td>
                           <div className="row-actions">
                             <button className="act" title="Add note" onClick={() => setModal({ type: "note", lead: l })}><Icon name="note" /></button>
-                            {!terminal && <button className="act" title={["assigned", "reassigned"].includes(l.stage) ? "Reassign" : "Assign"} onClick={() => setModal({ type: ["assigned", "reassigned"].includes(l.stage) ? "reassign" : "assign", lead: l })}><Icon name="reassign" /></button>}
+                            {!terminal && pol.assign && <button className="act" title={isReassign ? "Reassign" : "Assign"} onClick={() => setModal({ type: isReassign ? "reassign" : "assign", lead: l })}><Icon name="reassign" /></button>}
                             <button className="act" title="Edit lead" onClick={() => navigate(`/leads/${l.id}/edit`)}><Icon name="note" /></button>
                             {!terminal && <button className="act reject" title="Reject" onClick={() => setModal({ type: "reject", lead: l })}><Icon name="reject" /></button>}
-                            <button className="act" title="View report" onClick={() => navigate(`/leads/${l.id}`)}><Icon name="view" /></button>
-                            <button className="act" title={done ? "Download report" : "Available when completed"} disabled={!done} onClick={() => download(l)}><Icon name="download" /></button>
-                            <button className="act reject" title="Delete" onClick={() => setModal({ type: "delete", lead: l })}><Icon name="del" /></button>
+                            {pol.view && <button className="act" title="View report" onClick={() => navigate(`/leads/${l.id}`)}><Icon name="view" /></button>}
+                            {pol.download && <button className="act" title="Download report" onClick={() => download(l)}><Icon name="download" /></button>}
+                            {pol.del && <button className="act reject" title="Delete" onClick={() => setModal({ type: "delete", lead: l })}><Icon name="del" /></button>}
                           </div>
                         </td>
                       </tr>

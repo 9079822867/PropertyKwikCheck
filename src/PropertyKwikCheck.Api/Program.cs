@@ -15,7 +15,6 @@ using PropertyKwikCheck.Infrastructure.Services;
 using PropertyKwikCheck.Infrastructure.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // ---- configuration ----------------------------------------------------------
 var connectionString = builder.Configuration.GetConnectionString("PropertyDb")
     ?? throw new InvalidOperationException("ConnectionStrings:PropertyDb is not configured.");
@@ -107,8 +106,20 @@ builder.Services.AddAuthorization(options =>
 });
 
 // ---- CORS -------------------------------------------------------------------
-var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
-    ?? ["http://localhost:3000", "http://localhost:5173"];
+// Baseline origins are baked into the code so CORS works even if the server's
+// (gitignored) appsettings.Production.json isn't updated. Any extra origins from
+// config are merged in. Deduped so a repeated entry doesn't break WithOrigins.
+string[] defaultCorsOrigins =
+[
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://property.kwikcheck.in",
+    "https://property-valuation-three.vercel.app",
+];
+var corsOrigins = defaultCorsOrigins
+    .Concat(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [])
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
 builder.Services.AddCors(o => o.AddPolicy("frontend", p => p
     .WithOrigins(corsOrigins)
     .AllowAnyHeader()
